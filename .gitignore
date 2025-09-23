@@ -3,7 +3,6 @@
 *.out
 *.obj
 *.o
-*.a
 *.so
 
 # Ignore debug and release folders (if created by build tools)

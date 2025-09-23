@@ -5,7 +5,6 @@
 *.o
 *.a
 *.so
-*.dll
 
 # Ignore debug and release folders (if created by build tools)
 Debug/

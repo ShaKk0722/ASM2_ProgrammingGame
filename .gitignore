@@ -1,0 +1,26 @@
+# Ignore build files and executables
+*.exe
+*.out
+*.obj
+*.o
+*.a
+*.so
+*.dll
+
+# Ignore debug and release folders (if created by build tools)
+Debug/
+Release/
+build/
+bin/
+
+# Ignore VSCode settings (but keep workspace settings if needed)
+.vscode/
+
+# Ignore temporary files
+*.log
+*.tmp
+*.cache
+
+# Ignore OS-specific junk
+.DS_Store
+Thumbs.db

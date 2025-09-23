@@ -8,8 +8,12 @@ private:
     SDL_Texture *backgroundTexture;
     SDL_Rect playWithPlayerButton;
     SDL_Rect playWithAIButton;
+    SDL_Rect optionsButton;
+    SDL_Rect exitButton;
     bool isPlayWithPlayerHovered;
     bool isPlayWithAIHovered;
+    bool isOptionsHovered;
+    bool isExitHovered;
 
 public:
     MainMenuScene();
@@ -20,4 +24,5 @@ public:
     void render();
     void loadBackground();
     bool isPointInRect(int x, int y, SDL_Rect rect);
+    void drawRoundedButton(SDL_Rect rect, int r, int g, int b, bool hovered);
 };

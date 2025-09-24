@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include "../objects/player.h"
+#include "../objects/ball.h"
 
 class GamePlayScene : public Scene
 {
@@ -19,6 +20,7 @@ private:
     Player* team2Players[2];
     int activePlayer1 = 0;
     int activePlayer2 = 0;
+    Ball* ball;
 
 public:
     GamePlayScene();

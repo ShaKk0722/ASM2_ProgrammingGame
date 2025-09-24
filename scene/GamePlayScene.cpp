@@ -13,6 +13,8 @@ GamePlayScene::GamePlayScene()
 
     team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 2);
     team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 2);
+
+    ball = new Ball(centerX, centerY, 15); // Ball at center
 }
 
 GamePlayScene::~GamePlayScene()
@@ -21,6 +23,7 @@ GamePlayScene::~GamePlayScene()
     delete team1Players[1];
     delete team2Players[0];
     delete team2Players[1];
+    delete ball;
 }
 
 void GamePlayScene::init(Manager *m)
@@ -140,5 +143,6 @@ void GamePlayScene::render()
         }
         team2Players[i]->render();
     }
+    ball->render();
 }
 

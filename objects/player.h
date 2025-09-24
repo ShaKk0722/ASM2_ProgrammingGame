@@ -19,6 +19,7 @@ public:
     ~Player();
     void update();
     void render();
+    void move(int dx, int dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
 };
 
 #endif

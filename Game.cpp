@@ -124,8 +124,8 @@ void Game::update()
         mainMenuScene.update();
         break;
     case GameState::GamePlay:
-        gameplayManager.refresh();
-        gameplayManager.update();
+        //gameplayScene.refresh();
+        gameplayScene.update();
         break;
     case GameState::GameOver:
         gameOverManager.refresh();
@@ -150,8 +150,7 @@ void Game::render()
         break;
     case GameState::GamePlay:
         // Red background for gameplay
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        gameplayScene.render();
         gameplayManager.draw();
         break;
     case GameState::GameOver:

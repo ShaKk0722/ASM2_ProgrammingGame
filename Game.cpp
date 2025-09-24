@@ -49,6 +49,15 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
             std::cout << "Renderer created!" << std::endl;
         }
 
+
+
+        // Initialize SDL_image
+        if (!(IMG_Init(IMG_INIT_JPG) & IMG_INIT_JPG))
+        {
+            std::cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
+            isRunning = false;
+        }
+        
         // Initialize scenes
         mainMenuScene.init(&mainMenuManager);
         gameplayScene.init(&gameplayManager);

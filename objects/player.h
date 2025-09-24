@@ -13,12 +13,14 @@ private:
     float delta_time;
     bool is_Choose;
     int team;
+    SDL_Texture* texture = nullptr;
 
 public:
     Player(int x, int y, int width, int height, int radius, int team);
     ~Player();
     void update();
     void render();
+    bool loadPlayer(const char* texturePath);
     void move(int dx, int dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
 };
 

@@ -9,14 +9,23 @@ void Player::update()
 
 void Player::render()
 {
-    SDL_Color color = (team == 1) ? SDL_Color{0, 0, 255, 255} : SDL_Color{255, 0, 0, 255};
-    SDL_SetRenderDrawColor(Game::renderer, color.r, color.g, color.b, color.a);
-    for (int w = 0; w < radius * 2; w++) {
-        for (int h = 0; h < radius * 2; h++) {
-            int dx = radius - w;
-            int dy = radius - h;
-            if ((dx*dx + dy*dy) <= (radius * radius)) {
-                SDL_RenderDrawPoint(Game::renderer, x + dx, y + dy);
+    if (texture) {
+        SDL_Rect dst;
+        dst.x = x - radius;
+        dst.y = y - radius;
+        dst.w = radius * 2;
+        dst.h = radius * 2;
+        SDL_RenderCopy(Game::renderer, texture, nullptr, &dst);
+    } else {
+        SDL_Color color = (team == 1) ? SDL_Color{0, 0, 255, 255} : SDL_Color{255, 0, 0, 255};
+        SDL_SetRenderDrawColor(Game::renderer, color.r, color.g, color.b, color.a);
+        for (int w = 0; w < radius * 2; w++) {
+            for (int h = 0; h < radius * 2; h++) {
+                int dx = radius - w;
+                int dy = radius - h;
+                if ((dx*dx + dy*dy) <= (radius * radius)) {
+                    SDL_RenderDrawPoint(Game::renderer, x + dx, y + dy);
+                }
             }
         }
     }
@@ -56,4 +65,24 @@ void Player::move(int dx, int dy, int fieldX, int fieldY, int fieldWidth, int fi
 
     x = newX;
     y = newY;
+}
+
+
+bool Player::loadPlayer(const char* texturePath)
+{
+    SDL_Surface* surface = IMG_Load(texturePath);
+    if (surface) {
+        texture = SDL_CreateTextureFromSurface(Game::renderer, surface);
+        SDL_FreeSurface(surface);
+        if (texture) {
+            std::cout << "Player image loaded successfully!" << std::endl;
+            return true;
+        } else {
+            std::cout << "Failed to create player texture: " << SDL_GetError() << std::endl;
+            return false;
+        }
+    } else {
+        std::cout << "Failed to load player image: " << IMG_GetError() << std::endl;
+        return false;
+    }
 }

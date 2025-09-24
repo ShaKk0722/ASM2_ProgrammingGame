@@ -1,2 +1,2 @@
 all:
-	g++ -I src/include -L src/lib -o main main.cpp Game.cpp scene/MainMenuScene.cpp scene/GamePlayScene.cpp scene/GamePlayWithAIScene.cpp objects/object.cpp objects/player.cpp objects/ball.cpp -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
+	g++ -I src/include -L src/lib -o main main.cpp Game.cpp scene/MainMenuScene.cpp scene/GamePlayScene.cpp scene/GamePlayWithAIScene.cpp objects/object.cpp objects/player.cpp objects/ball.cpp objects/ground.cpp -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf

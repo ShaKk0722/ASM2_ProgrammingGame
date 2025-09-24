@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "../objects/player.h"
 #include "../objects/ball.h"
+#include "../objects/ground.h"
 
 class GamePlayScene : public Scene
 {
@@ -21,6 +22,7 @@ private:
     int activePlayer1 = 0;
     int activePlayer2 = 0;
     Ball* ball;
+    Ground* ground;
 
 public:
     GamePlayScene();

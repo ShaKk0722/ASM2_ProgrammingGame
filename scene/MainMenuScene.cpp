@@ -64,13 +64,13 @@ void MainMenuScene::init(Manager *m)
 
 void MainMenuScene::loadBackground()
 {
-    // Initialize SDL_image
-    if (!(IMG_Init(IMG_INIT_JPG) & IMG_INIT_JPG))
-    {
-        std::cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
-        backgroundTexture = nullptr;
-        return;
-    }
+    // // Initialize SDL_image
+    // if (!(IMG_Init(IMG_INIT_JPG) & IMG_INIT_JPG))
+    // {
+    //     std::cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
+    //     backgroundTexture = nullptr;
+    //     return;
+    // }
 
     // Load the background image
     SDL_Surface *surface = IMG_Load("assets/images/background_menu.jpg");

@@ -3,22 +3,28 @@
 #include <iostream>
 
 GamePlayScene::GamePlayScene()
-    : fieldX(50), fieldY(50), fieldWidth(700), fieldHeight(400),
-      centerX(400), centerY(250), centerRadius(50),
-      leftGoal{40, 200, 10, 100}, rightGoal{750, 200, 10, 100}
 {
+    ground = new Ground(50, 50, 700, 400);
     int playerRadius = 20;
+    fieldX = ground->getFieldX();
+    fieldY = ground->getFieldY();
+    fieldWidth = ground->getFieldWidth();
+    fieldHeight = ground->getFieldHeight();
+    centerX = ground->getCenterX();
+    centerY = ground->getCenterY();
+
     team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 1);
     team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 1);
 
     team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 2);
     team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 2);
 
-    ball = new Ball(centerX, centerY, 15); // Ball at center
+    ball = new Ball(centerX, centerY, 15);
 }
 
 GamePlayScene::~GamePlayScene()
 {
+    delete ground;
     delete team1Players[0];
     delete team1Players[1];
     delete team2Players[0];
@@ -29,6 +35,12 @@ GamePlayScene::~GamePlayScene()
 void GamePlayScene::init(Manager *m)
 {
     manager = m;
+    ball->loadBall("assets/images/ball.png");
+    team1Players[0]->loadPlayer("assets/images/ronaldo.png");
+    team1Players[1]->loadPlayer("assets/images/ronaldo.png");
+    team2Players[0]->loadPlayer("assets/images/messi.png");
+    team2Players[1]->loadPlayer("assets/images/messi.png");
+    ground->loadGround("assets/images/football_field.jpeg");
     std::cout << "GamePlayScene initialized!" << std::endl;
 }
 
@@ -51,7 +63,7 @@ void GamePlayScene::handleEvents(SDL_Event event)
 
 void GamePlayScene::update()
 {
-    int moveStep = 10;
+    int moveStep = 5;
 
     // Team 1 active player: WASD
     if (keyStates[SDL_SCANCODE_W])
@@ -77,35 +89,7 @@ void GamePlayScene::update()
 
 void GamePlayScene::render()
 {
-    // Set field color (green)
-    SDL_SetRenderDrawColor(Game::renderer, 34, 139, 34, 255); // Forest green
-    SDL_Rect fieldRect = { fieldX, fieldY, fieldWidth, fieldHeight };
-    SDL_RenderFillRect(Game::renderer, &fieldRect);
-
-    // Draw field lines (white)
-    SDL_SetRenderDrawColor(Game::renderer, 255, 255, 255, 255);
-
-    // Center line
-    SDL_RenderDrawLine(Game::renderer, fieldX, fieldY + fieldHeight / 2,
-                       fieldX + fieldWidth, fieldY + fieldHeight / 2);
-
-    // Center circle
-    for (int w = 0; w < centerRadius * 2; w++)
-    {
-        for (int h = 0; h < centerRadius * 2; h++)
-        {
-            int dx = centerRadius - w;
-            int dy = centerRadius - h;
-            if ((dx*dx + dy*dy) <= (centerRadius * centerRadius))
-            {
-                SDL_RenderDrawPoint(Game::renderer, centerX + dx, centerY + dy);
-            }
-        }
-    }
-
-    // Goals
-    SDL_RenderFillRect(Game::renderer, &leftGoal);
-    SDL_RenderFillRect(Game::renderer, &rightGoal);
+    ground->render();
 
     // Draw players
     for (int i = 0; i < 2; ++i) {

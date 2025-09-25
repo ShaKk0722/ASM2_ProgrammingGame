@@ -2,7 +2,7 @@
 
 Game *game = nullptr;
 const int SCREEN_WIDTH = 1000;
-const int SCREEN_HEIGHT = 600;
+const int SCREEN_HEIGHT = 800;
 const int FPS = 60;
 const int deltaTime = 1000 / FPS;
 

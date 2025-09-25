@@ -4,7 +4,12 @@
 
 GamePlayScene::GamePlayScene()
 {
-    ground = new Ground(50, 50, 700, 400);
+    const int groundWidth = 800;
+    const int groundHeight = 500;
+    const int groundX = (1000 - groundWidth) / 2; // SCREEN_WIDTH - groundWidth
+    const int groundY = (800 - groundHeight) / 2; // SCREEN_HEIGHT - groundHeight
+
+    ground = new Ground(groundX, groundY, groundWidth, groundHeight);
     int playerRadius = 20;
     fieldX = ground->getFieldX();
     fieldY = ground->getFieldY();
@@ -32,6 +37,27 @@ GamePlayScene::~GamePlayScene()
     delete ball;
 }
 
+bool GamePlayScene::loadBackgroundFrames(const std::string& folder, int totalFrames) {
+    for (int i = 1; i <= totalFrames; i++) {
+        char path[256];
+        sprintf(path, "%s/frame_%03d.png", folder.c_str(), i);
+
+        SDL_Surface* surface = IMG_Load(path);
+        if (!surface) {
+            std::cerr << "Failed to load " << path << ": " << IMG_GetError() << std::endl;
+            continue;
+        }
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(Game::renderer, surface);
+        SDL_FreeSurface(surface);
+
+        if (tex) {
+            backgroundFrames.push_back(tex);
+        }
+    }
+
+    return !backgroundFrames.empty();
+}
+
 void GamePlayScene::init(Manager *m)
 {
     manager = m;
@@ -41,6 +67,7 @@ void GamePlayScene::init(Manager *m)
     team2Players[0]->loadPlayer("assets/images/messi.png");
     team2Players[1]->loadPlayer("assets/images/messi.png");
     ground->loadGround("assets/images/football_field.jpeg");
+    this->loadBackgroundFrames("assets/images/cheering_6", 10); // adjust number of frames
     std::cout << "GamePlayScene initialized!" << std::endl;
 }
 
@@ -85,10 +112,22 @@ void GamePlayScene::update()
     if (keyStates[SDL_SCANCODE_RIGHT])
         team2Players[activePlayer2]->move(moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
 
+    
+    Uint32 now = SDL_GetTicks();
+    if (now > lastFrameTime + frameDelay) {
+        currentFrame = (currentFrame + 1) % backgroundFrames.size();
+        lastFrameTime = now;
+    }
 }
 
 void GamePlayScene::render()
 {
+    if (!backgroundFrames.empty())
+    {
+        SDL_RenderCopy(Game::renderer, backgroundFrames[currentFrame], NULL, NULL);
+    } else {
+        std::cout << "No background texture loaded!" << std::endl;
+    }
     ground->render();
 
     // Draw players

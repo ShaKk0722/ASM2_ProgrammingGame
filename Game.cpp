@@ -49,15 +49,13 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height, bo
             std::cout << "Renderer created!" << std::endl;
         }
 
-
-
         // Initialize SDL_image
         if (!(IMG_Init(IMG_INIT_JPG) & IMG_INIT_JPG))
         {
             std::cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
             isRunning = false;
         }
-        
+
         // Initialize scenes
         mainMenuScene.init(&mainMenuManager);
         gameplayScene.init(&gameplayManager);
@@ -133,7 +131,7 @@ void Game::update()
         mainMenuScene.update();
         break;
     case GameState::GamePlay:
-        //gameplayScene.refresh();
+        // gameplayScene.refresh();
         gameplayScene.update();
         break;
     case GameState::GameOver:
@@ -141,8 +139,7 @@ void Game::update()
         gameOverManager.update();
         break;
     case GameState::GamePlayWithAI:
-        gamePlayWithAIManager.refresh();
-        gamePlayWithAIManager.update();
+        gamePlayWithAIScene.update();
         break;
     }
 }
@@ -169,9 +166,7 @@ void Game::render()
         gameOverManager.draw();
         break;
     case GameState::GamePlayWithAI:
-        // Red background for AI gameplay
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        gamePlayWithAIScene.render();
         gamePlayWithAIManager.draw();
         break;
     }

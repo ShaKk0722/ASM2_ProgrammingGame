@@ -62,10 +62,10 @@ void GamePlayScene::init(Manager *m)
 {
     manager = m;
     ball->loadBall("assets/images/ball.png");
-    team1Players[0]->loadPlayer("assets/images/ronaldo.png");
-    team1Players[1]->loadPlayer("assets/images/ronaldo.png");
-    team2Players[0]->loadPlayer("assets/images/messi.png");
-    team2Players[1]->loadPlayer("assets/images/messi.png");
+    team1Players[0]->loadPlayer("assets/images/vietnam.png");
+    team1Players[1]->loadPlayer("assets/images/vietnam.png");
+    team2Players[0]->loadPlayer("assets/images/china.png");
+    team2Players[1]->loadPlayer("assets/images/china.png");
     ground->loadGround("assets/images/football_field.jpeg");
     this->loadBackgroundFrames("assets/images/cheering_6", 10); // adjust number of frames
     std::cout << "GamePlayScene initialized!" << std::endl;

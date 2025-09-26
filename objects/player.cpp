@@ -47,10 +47,10 @@ Player::~Player()
 }
 
 
-void Player::move(int dx, int dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight)
+void Player::move(float dx, float dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight)
 {
-    int newX = x + dx;
-    int newY = y + dy;
+    float newX = x + dx;
+    float newY = y + dy;
 
     // Clamp to field boundaries
     int minX = fieldX + radius;

@@ -93,7 +93,7 @@ void GamePlayWithAIScene::handleEvents(SDL_Event event)
 
 void GamePlayWithAIScene::update()
 {
-    int moveStep = 5;
+    float moveStep = 0.2f;
 
     if (keyStates[SDL_SCANCODE_W])
         team1Players[activePlayer1]->move(0, -moveStep, fieldX, fieldY, fieldWidth, fieldHeight);

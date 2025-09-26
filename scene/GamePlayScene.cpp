@@ -90,7 +90,7 @@ void GamePlayScene::handleEvents(SDL_Event event)
 
 void GamePlayScene::update()
 {
-    int moveStep = 5;
+    float moveStep = 0.2f;
 
     // Team 1 active player: WASD
     if (keyStates[SDL_SCANCODE_W])

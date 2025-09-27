@@ -16,12 +16,12 @@ private:
     SDL_Texture* texture = nullptr;
 
 public:
-    Player(int x, int y, int width, int height, int radius, int team);
+    Player(int x, int y, int width, int height, int radius, int team, int mass, float accelerator_factor, float maxVel);
     ~Player();
     void update();
     void render();
     bool loadPlayer(const char* texturePath);
-    void move(float dx, float dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
+    void move(int stateMove, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
 };
 
 #endif

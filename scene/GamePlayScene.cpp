@@ -18,11 +18,11 @@ GamePlayScene::GamePlayScene()
     centerX = ground->getCenterX();
     centerY = ground->getCenterY();
 
-    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 1);
-    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 1);
+    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 1, 60, 0.01, 1);
+    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 1, 60, 0.01, 1);
 
-    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 2);
-    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 2);
+    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 2, 60, 0.01, 1);
+    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 2, 60, 0.01, 1);
 
     ball = new Ball(centerX, centerY, 15);
 }
@@ -90,27 +90,39 @@ void GamePlayScene::handleEvents(SDL_Event event)
 
 void GamePlayScene::update()
 {
-    float moveStep = 0.2f;
 
     // Team 1 active player: WASD
-    if (keyStates[SDL_SCANCODE_W])
-        team1Players[activePlayer1]->move(0, -moveStep, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_S])
-        team1Players[activePlayer1]->move(0, moveStep, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_A])
-        team1Players[activePlayer1]->move(-moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_D])
-        team1Players[activePlayer1]->move(moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
+    if (keyStates[SDL_SCANCODE_W]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
+    else if (keyStates[SDL_SCANCODE_S]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
+    else if (keyStates[SDL_SCANCODE_A]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
+    else if (keyStates[SDL_SCANCODE_D]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+    else {
+        team1Players[activePlayer1]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
 
     // Team 2 active player: Arrow keys
     if (keyStates[SDL_SCANCODE_UP])
-        team2Players[activePlayer2]->move(0, -moveStep, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_DOWN])
-        team2Players[activePlayer2]->move(0, moveStep, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_LEFT])
-        team2Players[activePlayer2]->move(-moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_RIGHT])
-        team2Players[activePlayer2]->move(moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
+        team2Players[activePlayer2]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth, fieldHeight);
+    else if (keyStates[SDL_SCANCODE_DOWN])
+        team2Players[activePlayer2]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth, fieldHeight);
+    else if (keyStates[SDL_SCANCODE_LEFT])
+        team2Players[activePlayer2]->move(SDL_SCANCODE_LEFT, fieldX, fieldY, fieldWidth, fieldHeight);
+    else if (keyStates[SDL_SCANCODE_RIGHT])
+        team2Players[activePlayer2]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth, fieldHeight);
+    else
+        team2Players[activePlayer2]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
 
     
     Uint32 now = SDL_GetTicks();

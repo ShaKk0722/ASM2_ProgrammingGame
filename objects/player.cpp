@@ -1,6 +1,8 @@
 
 #include "player.h"
 #include "../Game.h"
+#include <algorithm>
+#include <cmath>
 
 void Player::update()
 {
@@ -31,7 +33,7 @@ void Player::render()
     }
 }
 
-Player::Player(int x, int y, int width, int height, int radius, int team) : Object()
+Player::Player(int x, int y, int width, int height, int radius, int team, int mass, float accelerator_factor, float maxVel) : Object()
 {
     this->x = x;
     this->y = y;
@@ -39,6 +41,13 @@ Player::Player(int x, int y, int width, int height, int radius, int team) : Obje
     this->height = height;
     this->radius = radius;
     this->team = team;
+    this->acceleration_x = accelerator_factor;
+    this->acceleration_y = accelerator_factor;
+    this->mass = mass;
+    this->velocity_x = 0;
+    this->velocity_y = 0;
+    this->maxVel_X = maxVel;
+    this->maxVel_Y = maxVel;
 }
 
 Player::~Player()
@@ -46,11 +55,58 @@ Player::~Player()
     return;
 }
 
-
-void Player::move(float dx, float dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight)
+void Player::move(int stateMove, int fieldX, int fieldY, int fieldWidth, int fieldHeight)
 {
-    float newX = x + dx;
-    float newY = y + dy;
+    if (stateMove == SDL_SCANCODE_S || stateMove == SDL_SCANCODE_DOWN) {
+        this->velocity_y += this->acceleration_y;
+        // Clamp to maxVel_Y
+        if (this->velocity_y > this->maxVel_Y) {
+            this->velocity_y = this->maxVel_Y;
+        }
+    }
+        
+    else if (stateMove == SDL_SCANCODE_W || stateMove == SDL_SCANCODE_UP) {
+        // Increase velocity in the negative Y direction (up)
+        this->velocity_y -= this->acceleration_y;
+        // Clamp to -maxVel_Y
+        if (this->velocity_y < -this->maxVel_Y) {
+            this->velocity_y = -this->maxVel_Y;
+        }
+    }
+
+    else if (stateMove == SDL_SCANCODE_D || stateMove == SDL_SCANCODE_RIGHT) {
+        // Increase velocity in the positive X direction (right)
+        this->velocity_x += this->acceleration_x;
+        // Clamp to maxVel_X
+        if (this->velocity_x > this->maxVel_X) {
+            this->velocity_x = this->maxVel_X;
+        }
+    }
+        
+    else if (stateMove == SDL_SCANCODE_A || stateMove == SDL_SCANCODE_LEFT) {
+        // Increase velocity in the negative X direction (left)
+        this->velocity_x -= this->acceleration_x;
+        // Clamp to -maxVel_X
+        if (this->velocity_x < -this->maxVel_X) {
+            this->velocity_x = -this->maxVel_X;
+        }
+    }
+    else {
+        this->velocity_x *= 0.60f; // Reduce X velocity by 40%
+        this->velocity_y *= 0.60f; // Reduce Y velocity by 40%
+        
+        // Stop completely if velocity is very close to zero to prevent tiny, perpetual movement
+        const float STOP_THRESHOLD = 0.01f;
+        if (std::abs(this->velocity_x) < STOP_THRESHOLD) {
+            this->velocity_x = 0.0f;
+        }
+        if (std::abs(this->velocity_y) < STOP_THRESHOLD) {
+            this->velocity_y = 0.0f;
+        }
+    }
+
+    float newX = x + this->velocity_x;
+    float newY = y + this->velocity_y;
 
     // Clamp to field boundaries
     int minX = fieldX + radius;
@@ -58,10 +114,22 @@ void Player::move(float dx, float dy, int fieldX, int fieldY, int fieldWidth, in
     int minY = fieldY + radius;
     int maxY = fieldY + fieldHeight - radius;
 
-    if (newX < minX) newX = minX;
-    if (newX > maxX) newX = maxX;
-    if (newY < minY) newY = minY;
-    if (newY > maxY) newY = maxY;
+    if (newX < minX) {
+        newX = minX;
+        this->velocity_x = 0.0f; // Stop movement against the boundary
+    }
+    if (newX > maxX) {
+        newX = maxX;
+        this->velocity_x = 0.0f; // Stop movement against the boundary
+    }
+    if (newY < minY) {
+        newY = minY;
+        this->velocity_y = 0.0f; // Stop movement against the boundary
+    }
+    if (newY > maxY) {
+        newY = maxY;
+        this->velocity_y = 0.0f; // Stop movement against the boundary
+    }
 
     x = newX;
     y = newY;

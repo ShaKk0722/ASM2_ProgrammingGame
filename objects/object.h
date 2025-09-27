@@ -11,7 +11,6 @@ protected:
     float acceleration_x;
     float acceleration_y;
     float mass;
-
     float radius;
     float width;
     float height;

@@ -21,12 +21,12 @@ GamePlayWithAIScene::GamePlayWithAIScene()
     centerY = ground->getCenterY();
 
     // Team 1: Human players
-    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius * 2, playerRadius * 2, playerRadius, 1);
-    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius * 2, playerRadius * 2, playerRadius, 1);
+    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius * 2, playerRadius * 2, playerRadius, 1, 60, 0.2, 2);
+    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius * 2, playerRadius * 2, playerRadius, 1, 60, 0.2, 2);
 
     // Team 2: AI players
-    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius * 2, playerRadius * 2, playerRadius, 2);
-    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius * 2, playerRadius * 2, playerRadius, 2);
+    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius * 2, playerRadius * 2, playerRadius, 2, 60, 0.2, 2);
+    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius * 2, playerRadius * 2, playerRadius, 2, 60, 0.2, 2);
 
     ball = new Ball(centerX, centerY, 15);
 }
@@ -93,16 +93,25 @@ void GamePlayWithAIScene::handleEvents(SDL_Event event)
 
 void GamePlayWithAIScene::update()
 {
-    float moveStep = 0.2f;
-
-    if (keyStates[SDL_SCANCODE_W])
-        team1Players[activePlayer1]->move(0, -moveStep, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_S])
-        team1Players[activePlayer1]->move(0, moveStep, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_A])
-        team1Players[activePlayer1]->move(-moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
-    if (keyStates[SDL_SCANCODE_D])
-        team1Players[activePlayer1]->move(moveStep, 0, fieldX, fieldY, fieldWidth, fieldHeight);
+    // Team 1 active player: WASD
+    if (keyStates[SDL_SCANCODE_W]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
+    else if (keyStates[SDL_SCANCODE_S]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
+    else if (keyStates[SDL_SCANCODE_A]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+        
+    else if (keyStates[SDL_SCANCODE_D]) {
+        team1Players[activePlayer1]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
+    else {
+        team1Players[activePlayer1]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
+    }
 
     updateAI();
 
@@ -195,7 +204,7 @@ void GamePlayWithAIScene::moveAIPlayer(int playerIndex)
     int moveX = 0, moveY = 0;
     calculateAIMove(playerIndex, moveX, moveY);
 
-    team2Players[playerIndex]->move(moveX, moveY, fieldX, fieldY, fieldWidth, fieldHeight);
+    team2Players[playerIndex]->move(moveY, fieldX, fieldY, fieldWidth, fieldHeight);
 }
 
 int GamePlayWithAIScene::findBestAIPlayer()

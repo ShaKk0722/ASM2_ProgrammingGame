@@ -3,6 +3,25 @@
 
 #include <SDL2/SDL.h>
 #include "object.h"
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <iostream>
+
+struct PlayerConfig {
+    int width;
+    int height;
+    int radius;
+    int mass;
+    float accelerator_factor;
+    float maxVel;
+};
+
+
+
+std::vector<PlayerConfig> loadPlayerConfigs(const std::string& filePath);
+
+
 
 class Player : public Object
 {
@@ -16,7 +35,7 @@ private:
     SDL_Texture* texture = nullptr;
 
 public:
-    Player(int x, int y, int width, int height, int radius, int team, int mass, float accelerator_factor, float maxVel);
+    Player(int x, int y, int team, const PlayerConfig& config);
     ~Player();
     void update();
     void render();

@@ -10,7 +10,6 @@ Ball::Ball(float x, float y, float radius)
 
 Ball::~Ball()
 {
-    std::cout << "Ball destructed at " << this << std::endl;
     if (texture) SDL_DestroyTexture(texture);
 }
 

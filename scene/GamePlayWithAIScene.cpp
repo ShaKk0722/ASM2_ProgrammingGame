@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <random>
 
 GamePlayWithAIScene::GamePlayWithAIScene()
 {
@@ -20,13 +21,20 @@ GamePlayWithAIScene::GamePlayWithAIScene()
     centerX = ground->getCenterX();
     centerY = ground->getCenterY();
 
-    // Team 1: Human players
-    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 1, 60, 0.01, 1);
-    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 1, 60, 0.01, 1);
+    // Load player configurations
+    std::vector<PlayerConfig> playerConfigs = loadPlayerConfigs("configs/player_configs.txt"); // Create this file
 
-    // Team 2: AI players
-    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 2, 60, 0.01, 1);
-    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 2, 60, 0.01, 1);
+    // Seed for random number generation
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(0, playerConfigs.size() - 1);
+
+    // Create players with random configurations
+    team1Players[0] = new Player(fieldX + 100, centerY - 50, 1, playerConfigs[distrib(gen)]);
+    team1Players[1] = new Player(fieldX + 100, centerY + 50, 1, playerConfigs[distrib(gen)]);
+
+    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, 2, playerConfigs[distrib(gen)]);
+    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, 2, playerConfigs[distrib(gen)]);
 
     ball = new Ball(centerX, centerY, 15);
 }

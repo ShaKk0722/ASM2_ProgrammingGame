@@ -4,6 +4,34 @@
 #include <algorithm>
 #include <cmath>
 
+std::vector<PlayerConfig> loadPlayerConfigs(const std::string& filePath) {
+    std::vector<PlayerConfig> configs;
+    std::ifstream file(filePath);
+    std::string line;
+
+    if (file.is_open()) {
+        while (std::getline(file, line)) {
+            std::stringstream ss(line);
+            PlayerConfig config;
+            std::string value;
+
+            if (std::getline(ss, value, ',')) config.width = std::stoi(value);
+            if (std::getline(ss, value, ',')) config.height = std::stoi(value);
+            if (std::getline(ss, value, ',')) config.radius = std::stoi(value);
+            if (std::getline(ss, value, ',')) config.mass = std::stoi(value);
+            if (std::getline(ss, value, ',')) config.accelerator_factor = std::stof(value);
+            if (std::getline(ss, value, ',')) config.maxVel = std::stof(value);
+
+            configs.push_back(config);
+        }
+        file.close();
+    } else {
+        std::cerr << "Unable to open file: " << filePath << std::endl;
+    }
+
+    return configs;
+}
+
 void Player::update()
 {
     return;
@@ -33,21 +61,21 @@ void Player::render()
     }
 }
 
-Player::Player(int x, int y, int width, int height, int radius, int team, int mass, float accelerator_factor, float maxVel) : Object()
+Player::Player(int x, int y, int team, const PlayerConfig& config) : Object()
 {
     this->x = x;
     this->y = y;
-    this->width = width;
-    this->height = height;
-    this->radius = radius;
+    this->width = config.width;
+    this->height = config.height;
+    this->radius = config.radius;
     this->team = team;
-    this->acceleration_x = accelerator_factor;
-    this->acceleration_y = accelerator_factor;
-    this->mass = mass;
+    this->acceleration_x = config.accelerator_factor;
+    this->acceleration_y = config.accelerator_factor;
+    this->mass = config.mass;
     this->velocity_x = 0;
     this->velocity_y = 0;
-    this->maxVel_X = maxVel;
-    this->maxVel_Y = maxVel;
+    this->maxVel_X = config.maxVel;
+    this->maxVel_Y = config.maxVel;
 }
 
 Player::~Player()

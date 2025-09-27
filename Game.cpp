@@ -54,12 +54,7 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
       isRunning = false;
     }
 
-    // Initialize SDL_mixer
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-      std::cout << "SDL_mixer error: " << Mix_GetError() << std::endl;
-    } else {
-      initMusic();
-    }
+  
 
     // Initialize scenes
     mainMenuScene.init(&mainMenuManager);
@@ -71,6 +66,12 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
   } else {
     isRunning = false;
   }
+    // Initialize SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+      std::cout << "SDL_mixer error: " << Mix_GetError() << std::endl;
+    } else {
+      initMusic();
+    }
 }
 
 void Game::handleEvents() {
@@ -219,11 +220,16 @@ void Game::switchToMainMenu() {
 }
 
 void Game::initMusic() {
-  bgMusic = Mix_LoadMUS("assets/sounds/background.mp3");
+  bgMusic = Mix_LoadMUS("assets/sounds/background.wav");
   if (!bgMusic) {
     std::cout << "Failed to load bg music: " << Mix_GetError() << std::endl;
   } else {
-    Mix_PlayMusic(bgMusic, -1); // loop forever
-    Mix_VolumeMusic(volume);    // set starting volume
+    if (Mix_PlayMusic(bgMusic, -1) == -1) {
+      std::cout << "Mix_PlayMusic failed: " << Mix_GetError() << std::endl;
+    }
+    std::cout << "Opened audio driver: " << SDL_GetCurrentAudioDriver()
+              << std::endl;
+
+    Mix_VolumeMusic(volume);
   }
 }

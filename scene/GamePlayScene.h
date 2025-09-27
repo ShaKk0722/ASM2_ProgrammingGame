@@ -23,10 +23,15 @@ private:
     int activePlayer2 = 0;
     Ball* ball;
     Ground* ground;
+    std::vector<SDL_Texture*> backgroundFrames;
+    int currentFrame = 0 ;
+    Uint32 lastFrameTime = 0;
+    Uint32 frameDelay = 1000 / 10;
 
 public:
     GamePlayScene();
     ~GamePlayScene();
+    bool loadBackgroundFrames(const std::string& folder, int totalFrames);
     void init(Manager* m);
     void handleEvents(SDL_Event event);
     void update();

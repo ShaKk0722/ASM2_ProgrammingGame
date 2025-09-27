@@ -21,7 +21,7 @@ public:
     void update();
     void render();
     bool loadPlayer(const char* texturePath);
-    void move(int dx, int dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
+    void move(float dx, float dy, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
 };
 
 #endif

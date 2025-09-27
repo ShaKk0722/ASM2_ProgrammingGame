@@ -8,11 +8,12 @@ Manager Game::gameplayManager;
 Manager Game::mainMenuManager;
 Manager Game::gameOverManager;
 Manager Game::gamePlayWithAIManager;
+Manager Game::settingsManager;
+
 MainMenuScene Game::mainMenuScene;
 GamePlayScene Game::gameplayScene;
 GamePlayWithAIScene Game::gamePlayWithAIScene;
 SettingsScene Game::settingsScene;
-Manager Game::settingsManager;
 
 Mix_Music *Game::bgMusic = nullptr;
 int Game::volume = MIX_MAX_VOLUME / 2;
@@ -53,6 +54,13 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
       isRunning = false;
     }
 
+    // Initialize SDL_mixer
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+      std::cout << "SDL_mixer error: " << Mix_GetError() << std::endl;
+    } else {
+      initMusic();
+    }
+
     // Initialize scenes
     mainMenuScene.init(&mainMenuManager);
     gameplayScene.init(&gameplayManager);
@@ -62,11 +70,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
     isRunning = true;
   } else {
     isRunning = false;
-  }
-  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-    std::cout << "SDL_mixer error: " << Mix_GetError() << std::endl;
-  } else {
-    initMusic();
   }
 }
 
@@ -99,7 +102,7 @@ void Game::handleEvents() {
       gameState = GameState::GameOver;
       std::cout << "Switched to Game Over" << std::endl;
       break;
-    case SDLK_5: // ✅ assign a key for settings
+    case SDLK_5: // shortcut to settings
       gameState = GameState::Settings;
       std::cout << "Switched to Settings" << std::endl;
       break;
@@ -110,6 +113,7 @@ void Game::handleEvents() {
     break;
   }
 
+  // Pass events to current scene
   switch (gameState) {
   case GameState::MainMenu:
     mainMenuScene.handleEvents(event);
@@ -136,7 +140,6 @@ void Game::update() {
     mainMenuScene.update();
     break;
   case GameState::GamePlay:
-    // gameplayScene.refresh();
     gameplayScene.update();
     break;
   case GameState::GameOver:
@@ -144,8 +147,7 @@ void Game::update() {
     gameOverManager.update();
     break;
   case GameState::GamePlayWithAI:
-    gamePlayWithAIManager.refresh();
-    gamePlayWithAIManager.update();
+    gamePlayWithAIScene.update();
     break;
   case GameState::Settings:
     settingsManager.refresh();
@@ -164,20 +166,16 @@ void Game::render() {
     mainMenuManager.draw();
     break;
   case GameState::GamePlay:
-    // Red background for gameplay
     gameplayScene.render();
     gameplayManager.draw();
     break;
   case GameState::GameOver:
-    // Black background for game over
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     gameOverManager.draw();
     break;
   case GameState::GamePlayWithAI:
-    // Red background for AI gameplay
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderClear(renderer);
+    gamePlayWithAIScene.render();
     gamePlayWithAIManager.draw();
     break;
   case GameState::Settings:
@@ -214,6 +212,7 @@ void Game::switchToSettings() {
   gameState = GameState::Settings;
   std::cout << "Switched to Settings!" << std::endl;
 }
+
 void Game::switchToMainMenu() {
   gameState = GameState::MainMenu;
   std::cout << "Switched to Main Menu!" << std::endl;

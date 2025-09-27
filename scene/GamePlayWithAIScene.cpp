@@ -21,12 +21,12 @@ GamePlayWithAIScene::GamePlayWithAIScene()
     centerY = ground->getCenterY();
 
     // Team 1: Human players
-    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius * 2, playerRadius * 2, playerRadius, 1, 60, 0.2, 2);
-    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius * 2, playerRadius * 2, playerRadius, 1, 60, 0.2, 2);
+    team1Players[0] = new Player(fieldX + 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 1, 60, 0.01, 1);
+    team1Players[1] = new Player(fieldX + 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 1, 60, 0.01, 1);
 
     // Team 2: AI players
-    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius * 2, playerRadius * 2, playerRadius, 2, 60, 0.2, 2);
-    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius * 2, playerRadius * 2, playerRadius, 2, 60, 0.2, 2);
+    team2Players[0] = new Player(fieldX + fieldWidth - 100, centerY - 50, playerRadius*2, playerRadius*2, playerRadius, 2, 60, 0.01, 1);
+    team2Players[1] = new Player(fieldX + fieldWidth - 100, centerY + 50, playerRadius*2, playerRadius*2, playerRadius, 2, 60, 0.01, 1);
 
     ball = new Ball(centerX, centerY, 15);
 }

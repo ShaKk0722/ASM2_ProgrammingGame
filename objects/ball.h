@@ -14,6 +14,7 @@ public:
     ~Ball();
     bool loadBall(const char* texturePath);
     void render();
+    void move(float accelerator_x, float accelerator_y, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
 };
 
 #endif

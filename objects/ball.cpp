@@ -6,6 +6,8 @@ Ball::Ball(float x, float y, float radius)
     set_x(x);
     set_y(y);
     set_shape(radius * 2, radius * 2, radius);
+    this->velocity_x = 0;
+    this->velocity_y = 0;
 }
 
 Ball::~Ball()
@@ -65,4 +67,45 @@ void Ball::render()
             }
         }
     }
+}
+
+void Ball::move(float v_x, float v_y, int fieldX, int fieldY, int fieldWidth, int fieldHeight) {
+    this->velocity_x = 0.995*this->velocity_x + v_x;
+    this->velocity_y = 0.995*this->velocity_y + v_y;
+    const float STOP_THRESHOLD = 0.000001f;
+    if (std::abs(this->velocity_x) < STOP_THRESHOLD) {
+        this->velocity_x = 0.0f;
+    }
+    if (std::abs(this->velocity_y) < STOP_THRESHOLD) {
+        this->velocity_y = 0.0f;
+    }
+    float newX = x + this->velocity_x;
+    float newY = y + this->velocity_y;
+
+    // Clamp to field boundaries
+    int minX = fieldX + radius;
+    int maxX = fieldX + fieldWidth - radius;
+    int minY = fieldY + radius;
+    int maxY = fieldY + fieldHeight - radius;
+    const float BOUNCE_FACTOR = 0.9f;
+
+    if (newX < minX) {
+        newX = minX;
+        this->velocity_x = -this->velocity_x * BOUNCE_FACTOR; // Stop movement against the boundary
+    }
+    if (newX > maxX) {
+        newX = maxX;
+        this->velocity_x = -this->velocity_x * BOUNCE_FACTOR; // Stop movement against the boundary
+    }
+    if (newY < minY) {
+        newY = minY;
+        this->velocity_y = -this->velocity_y * BOUNCE_FACTOR; // Stop movement against the boundary
+    }
+    if (newY > maxY) {
+        newY = maxY;
+        this->velocity_y = -this->velocity_y * BOUNCE_FACTOR; // Stop movement against the boundary
+    }
+
+    set_x(newX);
+    set_y(newY);
 }

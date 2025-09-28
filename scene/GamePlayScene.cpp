@@ -2,6 +2,7 @@
 #include "../Game.h"
 #include <random>
 #include <iostream>
+#include "../math_utils.h"
 
 GamePlayScene::GamePlayScene()
 {
@@ -134,7 +135,21 @@ void GamePlayScene::update()
     else
         team2Players[activePlayer2]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
 
-    
+    float accelerator_x, accelerator_y = 0;
+    for(int i = 0; i < 2; ++i) {
+        float distance_1 = d2(this->ball->get_x(),this->team1Players[i]->get_x(),this->ball->get_y(), this->team1Players[i]->get_y());
+        float distance_2 = d2(this->ball->get_x(),this->team2Players[i]->get_x(),this->ball->get_y(), this->team2Players[i]->get_y());
+        if(distance_1 <= this->ball->get_radius() + this->team1Players[i]->get_radius()) {
+            accelerator_x += this->team1Players[i]->get_velocity_x();
+            accelerator_y += this->team1Players[i]->get_velocity_y();
+        }
+        if (distance_2 <= this->ball->get_radius() + this->team2Players[i]->get_radius()) {
+            accelerator_x += this->team2Players[i]->get_velocity_x();
+            accelerator_y += this->team2Players[i]->get_velocity_y();
+        }
+    }
+    ball->move(accelerator_x,accelerator_y,fieldX, fieldY, fieldWidth, fieldHeight);
+
     Uint32 now = SDL_GetTicks();
     if (now > lastFrameTime + frameDelay) {
         currentFrame = (currentFrame + 1) % backgroundFrames.size();

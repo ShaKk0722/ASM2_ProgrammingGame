@@ -120,11 +120,11 @@ void Player::move(int stateMove, int fieldX, int fieldY, int fieldWidth, int fie
         }
     }
     else {
-        this->velocity_x *= 0.60f; // Reduce X velocity by 40%
-        this->velocity_y *= 0.60f; // Reduce Y velocity by 40%
+        this->velocity_x *= 0.90f; // Reduce X velocity by 40%
+        this->velocity_y *= 0.90f; // Reduce Y velocity by 40%
         
         // Stop completely if velocity is very close to zero to prevent tiny, perpetual movement
-        const float STOP_THRESHOLD = 0.01f;
+        const float STOP_THRESHOLD = 0.0001f;
         if (std::abs(this->velocity_x) < STOP_THRESHOLD) {
             this->velocity_x = 0.0f;
         }

@@ -8,7 +8,7 @@ LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 # Source files
 SRCS = main.cpp Game.cpp \
        scene/MainMenuScene.cpp scene/GamePlayScene.cpp scene/GamePlayWithAIScene.cpp scene/SettingsScene.cpp \
-       objects/object.cpp objects/player.cpp objects/ball.cpp objects/ground.cpp
+       objects/object.cpp objects/player.cpp objects/ball.cpp objects/ground.cpp math_utils.cpp
 
 # Output
 TARGET = main

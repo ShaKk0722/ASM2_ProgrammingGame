@@ -48,6 +48,28 @@ GamePlayScene::~GamePlayScene()
     delete ball;
 }
 
+
+bool GamePlayScene::loadWindFrames(const std::string& folder, int totalFrames) {
+    for (int i = 1; i <= totalFrames; i++) {
+        char path[256];
+        sprintf(path, "%s/frame_%03d.png", folder.c_str(), i);
+
+        SDL_Surface* surface = IMG_Load(path);
+        if (!surface) {
+            std::cerr << "Failed to load " << path << ": " << IMG_GetError() << std::endl;
+            continue;
+        }
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(Game::renderer, surface);
+        SDL_FreeSurface(surface);
+
+        if (tex) {
+            windFrames.push_back(tex);
+        }
+    }
+
+    return !windFrames.empty();
+}
+
 bool GamePlayScene::loadBackgroundFrames(const std::string& folder, int totalFrames) {
     for (int i = 1; i <= totalFrames; i++) {
         char path[256];
@@ -78,7 +100,9 @@ void GamePlayScene::init(Manager *m)
     team2Players[0]->loadPlayer("assets/images/china.png");
     team2Players[1]->loadPlayer("assets/images/china.png");
     ground->loadGround("assets/images/football_field.jpeg");
+    ground->spawnInitialObstacles(2, 40, 120, ball, team1Players, team2Players , 2); // Spawn 2 obstacles in the center 1/3 area
     this->loadBackgroundFrames("assets/images/cheering_6", 10); // adjust number of frames
+    this->loadWindFrames("assets/images/wind_2", 5); // adjust number of frames
     std::cout << "GamePlayScene initialized!" << std::endl;
 }
 
@@ -101,27 +125,44 @@ void GamePlayScene::handleEvents(SDL_Event event)
 
 void GamePlayScene::update()
 {
+    Uint32 now = SDL_GetTicks();
+
+    // Handle wind effect timing
+    if (windActive) {
+        // Deactivate wind after its duration
+        if (now > windStartTime + windDuration) {
+            windActive = false;
+            windX = 0; // Reset wind force
+            windY = 0;
+        }
+    } else {
+        // Reactivate wind after cooldown
+        if (now > windStartTime + windDuration + windCooldown) {
+            windActive = true;
+            windStartTime = now;
+
+            // Randomize wind direction and strength
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<float> windDistrib(-0.5f, 0.5f); // Wind strength range (-0.5 to 0.5)
+
+            windX = windDistrib(gen);
+            windY = windDistrib(gen);
+        }
+    }
 
     // Team 1 active player: WASD
     if (keyStates[SDL_SCANCODE_W]) {
         team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
-    }
-        
-    else if (keyStates[SDL_SCANCODE_S]) {
+    } else if (keyStates[SDL_SCANCODE_S]) {
         team1Players[activePlayer1]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
-    }
-        
-    else if (keyStates[SDL_SCANCODE_A]) {
+    } else if (keyStates[SDL_SCANCODE_A]) {
         team1Players[activePlayer1]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth, fieldHeight);
-    }
-        
-    else if (keyStates[SDL_SCANCODE_D]) {
+    } else if (keyStates[SDL_SCANCODE_D]) {
         team1Players[activePlayer1]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth, fieldHeight);
-    }
-    else {
+    } else {
         team1Players[activePlayer1]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
     }
-        
 
     // Team 2 active player: Arrow keys
     if (keyStates[SDL_SCANCODE_UP])
@@ -135,11 +176,11 @@ void GamePlayScene::update()
     else
         team2Players[activePlayer2]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
 
-    float accelerator_x, accelerator_y = 0;
-    for(int i = 0; i < 2; ++i) {
-        float distance_1 = d2(this->ball->get_x(),this->team1Players[i]->get_x(),this->ball->get_y(), this->team1Players[i]->get_y());
-        float distance_2 = d2(this->ball->get_x(),this->team2Players[i]->get_x(),this->ball->get_y(), this->team2Players[i]->get_y());
-        if(distance_1 <= this->ball->get_radius() + this->team1Players[i]->get_radius()) {
+    float accelerator_x = 0, accelerator_y = 0;
+    for (int i = 0; i < 2; ++i) {
+        float distance_1 = d2(this->ball->get_x(), this->team1Players[i]->get_x(), this->ball->get_y(), this->team1Players[i]->get_y());
+        float distance_2 = d2(this->ball->get_x(), this->team2Players[i]->get_x(), this->ball->get_y(), this->team2Players[i]->get_y());
+        if (distance_1 <= this->ball->get_radius() + this->team1Players[i]->get_radius()) {
             accelerator_x += this->team1Players[i]->get_velocity_x();
             accelerator_y += this->team1Players[i]->get_velocity_y();
         }
@@ -148,9 +189,18 @@ void GamePlayScene::update()
             accelerator_y += this->team2Players[i]->get_velocity_y();
         }
     }
-    ball->move(accelerator_x,accelerator_y,fieldX, fieldY, fieldWidth, fieldHeight);
 
-    Uint32 now = SDL_GetTicks();
+    // Apply wind effect to the ball if active
+    if (windActive) {
+        accelerator_x += windX;
+        accelerator_y += windY;
+    }
+
+    ball->move(accelerator_x, accelerator_y, fieldX, fieldY, fieldWidth, fieldHeight);
+
+    ground->update(now);
+
+    // Update background animation
     if (now > lastFrameTime + frameDelay) {
         currentFrame = (currentFrame + 1) % backgroundFrames.size();
         lastFrameTime = now;
@@ -204,5 +254,23 @@ void GamePlayScene::render()
         team2Players[i]->render();
     }
     ball->render();
+
+    // Render wind animation on the ground if active
+    if (windActive && !windFrames.empty()) {
+        // Update wind animation frame
+        Uint32 now = SDL_GetTicks();
+        if (now > lastWindFrameTime + windFrameDelay) {
+            currentWindFrame = (currentWindFrame + 1) % windFrames.size();
+            lastWindFrameTime = now;
+        }
+
+        // Calculate wind angle based on wind direction
+        float angle = atan2(windY, windX) * 180.0f / M_PI; // Convert radians to degrees
+
+        // Render the wind frame with rotation
+        SDL_Rect dstRect = {fieldX * 3 / 4, fieldY * 3 / 4, fieldWidth * 3 / 4, fieldHeight * 3 / 4}; // Cover the ground
+        SDL_RenderCopyEx(Game::renderer, windFrames[currentWindFrame], NULL, &dstRect, angle, NULL, SDL_FLIP_NONE);
+    }
+
 }
 

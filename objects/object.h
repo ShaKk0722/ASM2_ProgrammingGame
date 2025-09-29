@@ -16,16 +16,16 @@ protected:
     float height;
 
 public:
-    float get_x();
-    float get_y();
-    float get_velocity_x();
-    float get_velocity_y();
-    float get_acceleration_x();
-    float get_acceleration_y();
-    float get_mass();
-    float get_width();
-    float get_height();
-    float get_radius();
+    float get_x() const;
+    float get_y() const;
+    float get_velocity_x() const;
+    float get_velocity_y() const;
+    float get_acceleration_x() const;
+    float get_acceleration_y() const;
+    float get_mass() const;
+    float get_width() const;
+    float get_height() const;
+    float get_radius() const;
     void set_x(float x);
     void set_y(float y);
     void set_velocity(float velocity_x, float velocity_y);

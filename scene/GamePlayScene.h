@@ -28,10 +28,26 @@ private:
     Uint32 lastFrameTime = 0;
     Uint32 frameDelay = 1000 / 10;
 
+
+    float windX; // Wind force in the X direction
+    float windY; // Wind force in the Y direction
+
+    std::vector<SDL_Texture*> windFrames; // Wind animation frames
+    int currentWindFrame = 0;             // Current frame of the wind animation
+    Uint32 lastWindFrameTime = 0;         // Time of the last wind frame update
+    const Uint32 windFrameDelay = 100;    // Delay between wind frames (in milliseconds)
+
+    // Wind effect timing
+    bool windActive = false;             // Whether the wind effect is currently active
+    Uint32 windStartTime = 0;            // When the wind effect started
+    const Uint32 windDuration = 5000;    // Duration of the wind effect (in milliseconds)
+    const Uint32 windCooldown = 10000;   // Cooldown before the wind effect reappears (in milliseconds)
+
 public:
     GamePlayScene();
     ~GamePlayScene();
     bool loadBackgroundFrames(const std::string& folder, int totalFrames);
+    bool loadWindFrames(const std::string& folder, int totalFrames);
     void init(Manager* m);
     void handleEvents(SDL_Event event);
     void update();

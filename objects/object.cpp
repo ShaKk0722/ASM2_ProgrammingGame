@@ -1,52 +1,52 @@
 #include "object.h"
 
 // Getter methods
-float Object::get_x()
+float Object::get_x() const
 {
     return x;
 }
 
-float Object::get_y()
+float Object::get_y() const
 {
     return y;
 }
 
-float Object::get_velocity_x()
+float Object::get_velocity_x() const
 {
     return velocity_x;
 }
 
-float Object::get_velocity_y()
+float Object::get_velocity_y() const
 {
     return velocity_y;
 }
 
-float Object::get_acceleration_x()
+float Object::get_acceleration_x() const
 {
     return acceleration_x;
 }
 
-float Object::get_acceleration_y()
+float Object::get_acceleration_y() const
 {
     return acceleration_y;
 }
 
-float Object::get_mass()
+float Object::get_mass() const
 {
     return mass;
 }
 
-float Object::get_width()
+float Object::get_width() const
 {
     return width;
 }
 
-float Object::get_height()
+float Object::get_height() const
 {
     return height;
 }
 
-float Object::get_radius()
+float Object::get_radius() const
 {
     return radius;
 }

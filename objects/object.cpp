@@ -61,6 +61,16 @@ void Object::set_y(float y)
     this->y = y;
 }
 
+void Object::set_velocity_x(float velocity_x)
+{
+    this->velocity_x = velocity_x;
+}
+
+void Object::set_velocity_y(float velocity_y)
+{
+    this->velocity_y = velocity_y;
+}
+
 void Object::set_velocity(float velocity_x, float velocity_y)
 {
     this->velocity_x = velocity_x;

@@ -1,13 +1,16 @@
 #pragma once
 #include <SDL2/SDL.h>
 
-class Ground {
+class Ground
+{
 private:
     int fieldX, fieldY, fieldWidth, fieldHeight;
     int centerX, centerY, centerRadius;
     SDL_Rect leftGoal;
     SDL_Rect rightGoal;
-    SDL_Texture * texture;
+    SDL_Texture *texture;
+
+    void drawGoalMarkers();
 
 public:
     Ground(int x, int y, int width, int height);
@@ -18,5 +21,5 @@ public:
     int getFieldHeight() const { return fieldHeight; }
     int getCenterX() const { return centerX; }
     int getCenterY() const { return centerY; }
-    bool loadGround(const char* texturePath);
+    bool loadGround(const char *texturePath);
 };

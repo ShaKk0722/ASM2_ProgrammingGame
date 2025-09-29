@@ -28,6 +28,8 @@ public:
     float get_radius();
     void set_x(float x);
     void set_y(float y);
+    void set_velocity_x(float velocity_x);
+    void set_velocity_y(float velocity_y);
     void set_velocity(float velocity_x, float velocity_y);
     void set_acceleration(float acceleration_x, float acceleration_y);
     void set_mass(float mass);

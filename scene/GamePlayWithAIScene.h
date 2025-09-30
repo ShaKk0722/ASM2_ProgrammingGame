@@ -26,6 +26,7 @@ private:
     Uint32 frameDelay = 1000 / 10;
 
     Uint32 lastAIMove = 0;
+    Uint32 lastNonActiveAIMove = 0;
 
     void updateAI();
     void moveAIPlayer(int playerIndex);

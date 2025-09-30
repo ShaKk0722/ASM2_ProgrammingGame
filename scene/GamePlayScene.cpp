@@ -157,40 +157,46 @@ void GamePlayScene::update()
         team2Players[activePlayer2]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth, fieldHeight);
     else
         team2Players[activePlayer2]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
-    // Team 1 non-active player: AI
-    for (int i = 0; i < 2; ++i) {
-        if (i!=activePlayer1) {
-            int moveY = distrib(gen);
-            if(state1==0) team1Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
-            else if (state1 == 1) {
-                team1Players[i]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth, fieldHeight);
-                if (moveY==0) team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
-                else team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
-            }
-            else if (state1 == 2) {
-                team1Players[i]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth, fieldHeight);
-                if (moveY==0) team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
-                else team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
-            }
-        }
-    }
 
-    // Team 2 non-active player: AI
-    for (int i = 0; i < 2; ++i) {
-        if (i!=activePlayer2) {
-            int moveY = distrib(gen);
-            if(state2==0) team2Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
-            else if (state2 == 1) {
-                team2Players[i]->move(SDL_SCANCODE_LEFT, fieldX, fieldY, fieldWidth, fieldHeight);
-                if (moveY==0) team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth, fieldHeight);
-                else team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth, fieldHeight);
-            }
-            else if (state2 == 2) {
-                team2Players[i]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth, fieldHeight);
-                if (moveY==0) team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth, fieldHeight);
-                else team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth, fieldHeight);
+    Uint32 now = SDL_GetTicks();
+    if (now - lastNonActiveAIMove >= 5)
+    {
+        // Team 1 non-active player: AI
+        for (int i = 0; i < 2; ++i) {
+            if (i!=activePlayer1) {
+                int moveY = distrib(gen);
+                if(state1==0) team1Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
+                else if (state1 == 1) {
+                    team1Players[i]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth, fieldHeight);
+                    if (moveY==0) team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
+                    else team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
+                }
+                else if (state1 == 2) {
+                    team1Players[i]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth, fieldHeight);
+                    if (moveY==0) team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth, fieldHeight);
+                    else team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth, fieldHeight);
+                }
             }
         }
+
+        // Team 2 non-active player: AI
+        for (int i = 0; i < 2; ++i) {
+            if (i!=activePlayer2) {
+                int moveY = distrib(gen);
+                if(state2==0) team2Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
+                else if (state2 == 1) {
+                    team2Players[i]->move(SDL_SCANCODE_LEFT, fieldX, fieldY, fieldWidth, fieldHeight);
+                    if (moveY==0) team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth, fieldHeight);
+                    else team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth, fieldHeight);
+                }
+                else if (state2 == 2) {
+                    team2Players[i]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth, fieldHeight);
+                    if (moveY==0) team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth, fieldHeight);
+                    else team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth, fieldHeight);
+                }
+            }
+        }
+        lastNonActiveAIMove = now;
     }
 
     float accelerator_x = 0, accelerator_y = 0;
@@ -214,7 +220,7 @@ void GamePlayScene::update()
     // Check for goals
     checkGoal();
 
-    Uint32 now = SDL_GetTicks();
+    now = SDL_GetTicks();
     if (now > lastFrameTime + frameDelay)
     {
         currentFrame = (currentFrame + 1) % backgroundFrames.size();

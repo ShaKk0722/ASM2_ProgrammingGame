@@ -36,6 +36,8 @@ private:
     int goalTeam = 0; // Which team scored (1 or 2)
     bool ballResetPending = false;
 
+    Uint32 lastNonActiveAIMove = 0;
+
 public:
     GamePlayScene();
     ~GamePlayScene();

@@ -6,13 +6,13 @@ class Ground
 private:
     int fieldX, fieldY, fieldWidth, fieldHeight;
     int centerX, centerY, centerRadius;
-    SDL_Rect leftGoal;
-    SDL_Rect rightGoal;
     SDL_Texture *texture;
 
     void drawGoalMarkers();
 
 public:
+    SDL_Rect leftGoal;
+    SDL_Rect rightGoal;
     Ground(int x, int y, int width, int height);
     void render();
     int getFieldX() const { return fieldX; }

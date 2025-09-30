@@ -193,7 +193,7 @@ void GamePlayScene::update()
         }
     }
 
-    float accelerator_x, accelerator_y = 0;
+    float accelerator_x = 0, accelerator_y = 0;
     for (int i = 0; i < 2; ++i)
     {
         float distance_1 = d2(this->ball->get_x(), this->team1Players[i]->get_x(), this->ball->get_y(), this->team1Players[i]->get_y());

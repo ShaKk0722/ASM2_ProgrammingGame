@@ -210,7 +210,7 @@ void GamePlayWithAIScene::updateAI()
 {
     Uint32 now = SDL_GetTicks();
 
-    if (now - lastAIMove >= 300)
+    if (now - lastAIMove >= 10)
     {
         int bestAIPlayer = findBestAIPlayer();
         moveAIPlayer(bestAIPlayer);
@@ -222,11 +222,26 @@ void GamePlayWithAIScene::moveAIPlayer(int playerIndex)
 {
     if (playerIndex < 0 || playerIndex >= 2)
         return;
+    float dx = ball->get_x() - team2Players[playerIndex]->get_x();
+    float dy = ball->get_y() - team2Players[playerIndex]->get_y();
+    float threshold = ball->get_radius() + team2Players[playerIndex]->get_radius();
+    float dis = std::pow(std::pow(dx,2) + std::pow(dy,2),0.5);
 
-    int moveX = 0, moveY = 0;
-    calculateAIMove(playerIndex, moveX, moveY);
-
-    team2Players[playerIndex]->move(moveY, fieldX, fieldY, fieldWidth, fieldHeight);
+    if (dis > threshold) {
+        if (dx > 0) {
+            team2Players[playerIndex]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth, fieldHeight);
+        }
+        else if (dx < 0) {
+            team2Players[playerIndex]->move(SDL_SCANCODE_LEFT, fieldX, fieldY, fieldWidth, fieldHeight);
+        }
+        if (dy > 0) {
+            team2Players[playerIndex]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth, fieldHeight);
+        }
+        else if (dy < 0) {
+            team2Players[playerIndex]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth, fieldHeight);
+        }
+    }
+    else team2Players[playerIndex]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
 }
 
 int GamePlayWithAIScene::findBestAIPlayer()
@@ -239,29 +254,4 @@ int GamePlayWithAIScene::findBestAIPlayer()
     float dist1 = sqrt(pow(team2Players[1]->get_x() - ballX, 2) + pow(team2Players[1]->get_y() - ballY, 2));
 
     return (dist0 < dist1) ? 0 : 1;
-}
-
-void GamePlayWithAIScene::calculateAIMove(int playerIndex, int &moveX, int &moveY)
-{
-
-    float ballX = ball->get_x();
-    float ballY = ball->get_y();
-    float playerX = team2Players[playerIndex]->get_x();
-    float playerY = team2Players[playerIndex]->get_y();
-
-    float dx = ballX - playerX;
-    float dy = ballY - playerY;
-    float distance = sqrt(dx * dx + dy * dy);
-
-    if (distance > 0)
-    {
-        int moveStep = 3;
-        moveX = (int)((dx / distance) * moveStep);
-        moveY = (int)((dy / distance) * moveStep);
-    }
-    else
-    {
-        moveX = 0;
-        moveY = 0;
-    }
 }

@@ -41,6 +41,7 @@ public:
     void render();
     bool loadPlayer(const char* texturePath);
     void move(int stateMove, int fieldX, int fieldY, int fieldWidth, int fieldHeight);
+    float get_distance(float x, float y);
 };
 
 #endif

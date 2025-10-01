@@ -361,30 +361,6 @@ void GamePlayWithAIScene::updateAI() {
   }
 }
 
-void GamePlayWithAIScene::moveAIPlayer(int playerIndex) {
-  if (playerIndex < 0 || playerIndex >= 2)
-    return;
-
-  int moveX = 0, moveY = 0;
-  calculateAIMove(playerIndex, moveX, moveY);
-
-  team2Players[playerIndex]->move(moveY, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-}
-
-int GamePlayWithAIScene::findBestAIPlayer() {
-
-  float ballX = ball->get_x();
-  float ballY = ball->get_y();
-
-  float dist0 = sqrt(pow(team2Players[0]->get_x() - ballX, 2) +
-                     pow(team2Players[0]->get_y() - ballY, 2));
-  float dist1 = sqrt(pow(team2Players[1]->get_x() - ballX, 2) +
-                     pow(team2Players[1]->get_y() - ballY, 2));
-
-  return (dist0 < dist1) ? 0 : 1;
-}
-
 void GamePlayWithAIScene::calculateAIMove(int playerIndex, int &moveX,
                                           int &moveY) {
 
@@ -551,11 +527,4 @@ int GamePlayWithAIScene::findBestAIPlayer() {
                      pow(team2Players[1]->get_y() - ballY, 2));
 
   return (dist0 < dist1) ? 0 : 1;
-}
-
-void GamePlayWithAIScene::resetBall() {
-  ball->set_x(centerX);
-  ball->set_y(centerY);
-  ball->set_velocity_x(0);
-  ball->set_velocity_y(0);
 }

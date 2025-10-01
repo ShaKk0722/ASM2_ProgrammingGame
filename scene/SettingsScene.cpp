@@ -6,7 +6,8 @@ SettingsScene::SettingsScene() {
   volume = MIX_MAX_VOLUME / 2; // start at 50%
   isDownHovered = false;
   isUpHovered = false;
-
+  isSfxDownHovered = false;
+  isSfxUpHovered = false;
   int buttonWidth = 100;
   int buttonHeight = 50;
   int screenWidth = 1000;
@@ -29,6 +30,8 @@ SettingsScene::SettingsScene() {
                     buttonWidth, buttonHeight};
   backButton = {screenWidth / 2 - 50, volumeUpButton.y + buttonHeight + spacing,
                 100, 50};
+  sfxDownButton = {screenWidth / 2 - 150, volumeDownButton.y + 60, 100, 50};
+  sfxUpButton = {screenWidth / 2 + 50, volumeUpButton.y + 60, 100, 50};
   isBackHovered = false;
 }
 
@@ -96,14 +99,24 @@ void SettingsScene::handleEvents(SDL_Event event) {
       Mix_VolumeMusic(Game::volume);
     }
     if (isBackHovered) {
-      std::cout << "Back clicked!" << std::endl;
-      Game::switchToMainMenu();
+      if (Game::lastState == GameState::Pause) {
+        Game::gameState = GameState::Pause;
+      } else {
+        Game::switchToMainMenu();
+      }
     }
 
-    // check if click on slider handle
     if (mx >= sliderHandle.x && mx <= sliderHandle.x + sliderHandle.w &&
         my >= sliderHandle.y && my <= sliderHandle.y + sliderHandle.h) {
       dragging = true;
+    }
+    if (isSfxDownHovered) {
+      Game::sfxVolume = std::max(0, Game::sfxVolume - 1);
+      Mix_Volume(-1, Game::sfxVolume);
+    }
+    if (isSfxUpHovered) {
+      Game::sfxVolume = std::min(MIX_MAX_VOLUME, Game::sfxVolume + 1);
+      Mix_Volume(-1, Game::sfxVolume);
     }
   }
 

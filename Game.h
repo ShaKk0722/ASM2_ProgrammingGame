@@ -2,13 +2,21 @@
 #include "scene/GamePlayScene.h"
 #include "scene/GamePlayWithAIScene.h"
 #include "scene/MainMenuScene.h"
+#include "scene/PauseMenuScene.h"
 #include "scene/Scene.h"
 #include "scene/SettingsScene.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <iostream>
 
-enum class GameState { MainMenu, GamePlay, GamePlayWithAI, GameOver, Settings };
+enum class GameState {
+  MainMenu,
+  GamePlay,
+  GamePlayWithAI,
+  GameOver,
+  Settings,
+  Pause
+};
 
 class Game {
 private:
@@ -35,12 +43,19 @@ public:
   static void switchToGamePlay();
   static void switchToGamePlayWithAI();
   static void initMusic();
+  static void resumeGame();
+  static GameState lastState;
+  static Manager pauseManager;
+  static PauseMenuScene pauseMenuScene;
 
   static SDL_Renderer *renderer;
   static SDL_Event event;
   static Mix_Music *bgMusic;
   static int volume;
+  static int sfxVolume;
 
+  static bool sfxEnabled;
+  static Mix_Chunk *kickSound;
   static Manager gameplayManager;
   static Manager mainMenuManager;
   static Manager gameOverManager;

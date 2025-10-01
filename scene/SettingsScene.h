@@ -12,6 +12,10 @@ private:
   SDL_Texture *backgroundTexture;
   SDL_Rect sliderBar;
   SDL_Rect sliderHandle;
+  SDL_Rect sfxDownButton;
+  SDL_Rect sfxUpButton;
+  bool isSfxDownHovered;
+  bool isSfxUpHovered;
   bool dragging;
   bool isDownHovered;
   bool isUpHovered;
@@ -28,4 +32,5 @@ public:
   void update() override;
   void render() override;
   void drawButton(SDL_Rect rect, const char *text, bool hovered);
+  TTF_Font *getFont() const { return font; }
 };

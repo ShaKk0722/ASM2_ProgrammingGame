@@ -9,14 +9,19 @@ Manager Game::mainMenuManager;
 Manager Game::gameOverManager;
 Manager Game::gamePlayWithAIManager;
 Manager Game::settingsManager;
-
+bool Game::sfxEnabled = true;
+Mix_Chunk *Game::kickSound = nullptr;
 MainMenuScene Game::mainMenuScene;
 GamePlayScene Game::gameplayScene;
 GamePlayWithAIScene Game::gamePlayWithAIScene;
 SettingsScene Game::settingsScene;
+PauseMenuScene Game::pauseMenuScene;
+Manager Game::pauseManager;
+GameState Game::lastState = GameState::MainMenu;
 
 Mix_Music *Game::bgMusic = nullptr;
 int Game::volume = MIX_MAX_VOLUME / 2;
+int Game::sfxVolume = MIX_MAX_VOLUME / 2;
 
 Game::Game() {
   isRunning = false;
@@ -54,8 +59,6 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
       isRunning = false;
     }
 
-  
-
     // Initialize scenes
     mainMenuScene.init(&mainMenuManager);
     gameplayScene.init(&gameplayManager);
@@ -66,12 +69,18 @@ void Game::init(const char *title, int xpos, int ypos, int width, int height,
   } else {
     isRunning = false;
   }
-    // Initialize SDL_mixer
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-      std::cout << "SDL_mixer error: " << Mix_GetError() << std::endl;
-    } else {
-      initMusic();
-    }
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+    std::cout << "SDL_mixer error: " << Mix_GetError() << std::endl;
+  } else {
+    initMusic();
+  }
+  kickSound = Mix_LoadWAV("assets/sounds/kick.mp3");
+  if (!kickSound) {
+    std::cout << "Failed to load kick sound: " << Mix_GetError() << std::endl;
+  }
+  Mix_Volume(-1, Game::sfxVolume);
+
+  pauseMenuScene.init(&pauseManager);
 }
 
 void Game::handleEvents() {
@@ -130,6 +139,9 @@ void Game::handleEvents() {
     break;
   case GameState::GameOver:
     break;
+  case GameState::Pause:
+    pauseMenuScene.handleEvents(event);
+    break;
   }
 }
 
@@ -154,6 +166,11 @@ void Game::update() {
     settingsManager.refresh();
     settingsManager.update();
     settingsScene.update();
+    break;
+  case GameState::Pause:
+    pauseManager.refresh();
+    pauseManager.update();
+    pauseMenuScene.update();
     break;
   }
 }
@@ -183,6 +200,17 @@ void Game::render() {
     settingsScene.render();
     settingsManager.draw();
     break;
+  case GameState::Pause:
+    if (lastState == GameState::GamePlay) {
+      gameplayScene.render();
+      gameplayManager.draw();
+    } else if (lastState == GameState::GamePlayWithAI) {
+      gamePlayWithAIScene.render();
+      gamePlayWithAIManager.draw();
+    }
+    pauseMenuScene.render();
+    pauseManager.draw();
+    break;
   }
 
   SDL_RenderPresent(renderer);
@@ -195,6 +223,11 @@ void Game::clean() {
     Mix_FreeMusic(bgMusic);
     bgMusic = nullptr;
   }
+  if (kickSound) {
+    Mix_FreeChunk(kickSound);
+    kickSound = nullptr;
+  }
+
   SDL_Quit();
   std::cout << "Game cleaned!" << std::endl;
 }
@@ -232,4 +265,10 @@ void Game::initMusic() {
 
     Mix_VolumeMusic(volume);
   }
+}
+void Game::resumeGame() {
+  if (lastState == GameState::GamePlay)
+    gameState = GameState::GamePlay;
+  else if (lastState == GameState::GamePlayWithAI)
+    gameState = GameState::GamePlayWithAI;
 }

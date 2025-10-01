@@ -47,6 +47,30 @@ GamePlayWithAIScene::GamePlayWithAIScene() {
   ball = new Ball(centerX, centerY, 15);
 }
 
+
+
+bool GamePlayWithAIScene::loadWindFrames(const std::string& folder, int totalFrames) {
+    for (int i = 1; i <= totalFrames; i++) {
+        char path[256];
+        sprintf(path, "%s/frame_%03d.png", folder.c_str(), i);
+
+        SDL_Surface* surface = IMG_Load(path);
+        if (!surface) {
+            std::cerr << "Failed to load " << path << ": " << IMG_GetError() << std::endl;
+            continue;
+        }
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(Game::renderer, surface);
+        SDL_FreeSurface(surface);
+
+        if (tex) {
+            windFrames.push_back(tex);
+        }
+    }
+
+    return !windFrames.empty();
+}
+
+
 GamePlayWithAIScene::~GamePlayWithAIScene() {
   delete ground;
   delete team1Players[0];
@@ -89,6 +113,7 @@ void GamePlayWithAIScene::init(Manager *m) {
   ground->loadGround("assets/images/football_field.jpeg");
   this->loadBackgroundFrames("assets/images/cheering_6", 10);
   // In GamePlayScene::init
+  this->loadWindFrames("assets/images/wind_2", 5); // adjust number of frames
   startTime = SDL_GetTicks();
 
   std::cout << "GamePlayWithAIScene initialized!" << std::endl;
@@ -148,6 +173,29 @@ void GamePlayWithAIScene::handleEvents(SDL_Event event) {
 }
 
 void GamePlayWithAIScene::update() {
+    Uint32 now = SDL_GetTicks();
+    if (windActive) {
+        // Deactivate wind after its duration
+        if (now > windStartTime + windDuration) {
+            windActive = false;
+            windX = 0; // Reset wind force
+            windY = 0;
+        }
+    } else {
+        // Reactivate wind after cooldown
+        if (now > windStartTime + windDuration + windCooldown) {
+            windActive = true;
+            windStartTime = now;
+
+            // Randomize wind direction and strength
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<float> windDistrib(-0.5f, 0.5f); // Wind strength range (-0.5 to 0.5)
+
+            windX = windDistrib(gen);
+            windY = windDistrib(gen);
+        }
+    }
   // Team 1 active player: WASD
   if (keyStates[SDL_SCANCODE_W])
     team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY,
@@ -193,6 +241,10 @@ void GamePlayWithAIScene::update() {
         Mix_PlayChannel(-1, Game::kickSound, 0);
     }
   }
+  if (windActive) {
+      accelerator_x += windX;
+      accelerator_y += windY;
+  }
 
   // Move ball with accumulated momentum
   ball->move(accelerator_x, accelerator_y, fieldX, fieldY, fieldWidth,
@@ -202,7 +254,6 @@ void GamePlayWithAIScene::update() {
   checkGoal();
 
   // Animate background
-  Uint32 now = SDL_GetTicks();
   if (now > lastFrameTime + frameDelay) {
     currentFrame = (currentFrame + 1) % backgroundFrames.size();
     lastFrameTime = now;
@@ -263,6 +314,22 @@ void GamePlayWithAIScene::render() {
     team2Players[i]->render();
   }
   ball->render();
+  
+  if (windActive && !windFrames.empty()) {
+      // Update wind animation frame
+      Uint32 now = SDL_GetTicks();
+      if (now > lastWindFrameTime + windFrameDelay) {
+          currentWindFrame = (currentWindFrame + 1) % windFrames.size();
+          lastWindFrameTime = now;
+      }
+
+      // Calculate wind angle based on wind direction
+      float angle = atan2(windY, windX) * 180.0f / M_PI; // Convert radians to degrees
+
+      // Render the wind frame with rotation
+      SDL_Rect dstRect = {fieldX * 3 / 4, fieldY * 3 / 4, fieldWidth * 3 / 4, fieldHeight * 3 / 4}; // Cover the ground
+      SDL_RenderCopyEx(Game::renderer, windFrames[currentWindFrame], NULL, &dstRect, angle, NULL, SDL_FLIP_NONE);
+  }
   // draw pause
   //  In GamePlayScene.cpp render()
   SDL_SetRenderDrawColor(Game::renderer, pauseHovered ? 200 : 100, 100, 200,

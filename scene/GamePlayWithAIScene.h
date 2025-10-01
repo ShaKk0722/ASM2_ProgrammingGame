@@ -58,12 +58,27 @@ private:
   SDL_Rect backBtn = {380, 430, 240, 60};
   bool againHov = false, backHov = false;
 
+  float windX; // Wind force in the X direction
+  float windY; // Wind force in the Y direction
+
+  std::vector<SDL_Texture*> windFrames; // Wind animation frames
+  int currentWindFrame = 0;             // Current frame of the wind animation
+  Uint32 lastWindFrameTime = 0;         // Time of the last wind frame update
+  const Uint32 windFrameDelay = 100;    // Delay between wind frames (in milliseconds)
+
+  // Wind effect timing
+  bool windActive = false;             // Whether the wind effect is currently active
+  Uint32 windStartTime = 0;            // When the wind effect started
+  const Uint32 windDuration = 5000;    // Duration of the wind effect (in milliseconds)
+  const Uint32 windCooldown = 10000;   // Cooldown before the wind effect reappears (in milliseconds)
+
 public:
   GamePlayWithAIScene();
   ~GamePlayWithAIScene();
 
   // Core
   bool loadBackgroundFrames(const std::string &folder, int totalFrames);
+  bool loadWindFrames(const std::string& folder, int totalFrames);
   void init(Manager *m) override;
   void handleEvents(SDL_Event event) override;
   void update() override;

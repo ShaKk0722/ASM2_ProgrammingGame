@@ -13,7 +13,6 @@ private:
   int centerX, centerY, centerRadius;
 
   // Goal properties
-  // Goal properties
   SDL_Point leftGoalTop;
   SDL_Point leftGoalBottom;
   SDL_Point rightGoalTop;
@@ -29,9 +28,8 @@ private:
   Uint32 lastFrameTime = 0;
   Uint32 frameDelay = 1000 / 10;
 
-  Uint32 lastAIMove = 0;
-
   // === AI helpers ===
+  Uint32 lastAIMove = 0;
   void updateAI();
   void moveAIPlayer(int playerIndex);
   int findBestAIPlayer();
@@ -44,12 +42,16 @@ private:
   Uint32 goalTime = 0;
   int goalTeam = 0; // 1 or 2
   bool ballResetPending = false;
-  // In GamePlayScene.h (add private member)
+
+  // Pause menu button
   SDL_Rect pauseButton = {900, 20, 80, 40}; // top-right corner
   bool pauseHovered = false;
-  // In GamePlayScene.h (and GamePlayWithAIScene.h)
+
+  // Timer
   Uint32 startTime = 0;
   int elapsedSeconds = 0;
+
+  // Match end
   bool matchOver = false;
   int winnerTeam = 0; // 1 or 2
   SDL_Rect againBtn = {380, 360, 240, 60};

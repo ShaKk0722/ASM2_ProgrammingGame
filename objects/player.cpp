@@ -219,3 +219,9 @@ bool Player::loadPlayer(const char *texturePath)
         return false;
     }
 }
+
+float Player::get_distance(float x, float y) {
+    float dx = this->x - x;
+    float dy = this->y - y;
+    return std::pow(std::pow(dx,2) + std::pow(dy,2), 0.5);
+}

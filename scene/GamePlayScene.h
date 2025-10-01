@@ -48,6 +48,8 @@ private:
   SDL_Rect backBtn = {380, 430, 240, 60};
   bool againHov = false, backHov = false;
 
+    Uint32 lastNonActiveAIMove = 0;
+
 public:
   GamePlayScene();
   ~GamePlayScene();

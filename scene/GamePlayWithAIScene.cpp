@@ -445,12 +445,13 @@ void GamePlayWithAIScene::renderScore() {
   SDL_FreeSurface(surf2);
   SDL_DestroyTexture(tex2);
 }
+
 void GamePlayWithAIScene::checkGoal() {
   float ballX = ball->get_x();
   float ballY = ball->get_y();
   float ballRadius = ball->get_radius();
 
-  // Left goal check
+  // Left goal line
   if (ballX - ballRadius <= leftGoalTop.x && ballY >= leftGoalTop.y &&
       ballY <= leftGoalBottom.y) {
     if (!goalScored) {
@@ -463,8 +464,7 @@ void GamePlayWithAIScene::checkGoal() {
                 << std::endl;
     }
   }
-
-  // Right goal check
+  // Right goal line
   else if (ballX + ballRadius >= rightGoalTop.x && ballY >= rightGoalTop.y &&
            ballY <= rightGoalBottom.y) {
     if (!goalScored) {
@@ -478,6 +478,7 @@ void GamePlayWithAIScene::checkGoal() {
     }
   }
 
+  // Reset after goal delay
   if (ballResetPending && SDL_GetTicks() - goalTime > 1500) {
     resetBall();
     ballResetPending = false;
@@ -486,11 +487,72 @@ void GamePlayWithAIScene::checkGoal() {
     goalScored = false;
     goalTeam = 0;
   }
+
+  // End match at 3 goals
   if (team1Score == 3 || team2Score == 3) {
     matchOver = true;
     winnerTeam = (team1Score == 3) ? 1 : 2;
   }
 }
+
+void GamePlayWithAIScene::resetBall() {
+  ball->set_x(centerX);
+  ball->set_y(centerY);
+  ball->set_velocity_x(0);
+  ball->set_velocity_y(0);
+}
+
+void GamePlayWithAIScene::moveAIPlayer(int playerIndex) {
+  if (playerIndex < 0 || playerIndex >= 2)
+    return;
+
+  float dx = ball->get_x() - team2Players[playerIndex]->get_x();
+  float dy = ball->get_y() - team2Players[playerIndex]->get_y();
+  float threshold =
+      ball->get_radius() + team2Players[playerIndex]->get_radius();
+  float dis = std::sqrt(dx * dx + dy * dy);
+
+  if (dis > threshold) {
+    if (dx > 0)
+      team2Players[playerIndex]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+    else if (dx < 0)
+      team2Players[playerIndex]->move(SDL_SCANCODE_LEFT, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+
+    if (dy > 0)
+      team2Players[playerIndex]->move(SDL_SCANCODE_DOWN, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+    else if (dy < 0)
+      team2Players[playerIndex]->move(SDL_SCANCODE_UP, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+  } else {
+    float target_dy =
+        this->ground->leftGoal.y - team2Players[playerIndex]->get_y();
+    team2Players[playerIndex]->move(SDL_SCANCODE_LEFT, fieldX, fieldY,
+                                    fieldWidth, fieldHeight);
+    if (target_dy > this->ground->leftGoal.h) {
+      team2Players[playerIndex]->move(SDL_SCANCODE_DOWN, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+    } else if (target_dy < -this->ground->leftGoal.h) {
+      team2Players[playerIndex]->move(SDL_SCANCODE_UP, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+    }
+  }
+}
+
+int GamePlayWithAIScene::findBestAIPlayer() {
+  float ballX = ball->get_x();
+  float ballY = ball->get_y();
+
+  float dist0 = sqrt(pow(team2Players[0]->get_x() - ballX, 2) +
+                     pow(team2Players[0]->get_y() - ballY, 2));
+  float dist1 = sqrt(pow(team2Players[1]->get_x() - ballX, 2) +
+                     pow(team2Players[1]->get_y() - ballY, 2));
+
+  return (dist0 < dist1) ? 0 : 1;
+}
+
 void GamePlayWithAIScene::resetBall() {
   ball->set_x(centerX);
   ball->set_y(centerY);

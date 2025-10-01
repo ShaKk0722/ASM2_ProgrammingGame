@@ -237,6 +237,8 @@ void GamePlayScene::update() {
   checkGoal();
 
   Uint32 now = SDL_GetTicks();
+  elapsedSeconds = (now - startTime) / 1000;
+
   if (now > lastFrameTime + frameDelay) {
     currentFrame = (currentFrame + 1) % backgroundFrames.size();
     lastFrameTime = now;

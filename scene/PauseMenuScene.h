@@ -5,9 +5,13 @@
 
 class PauseMenuScene : public Scene {
 private:
-  SDL_Rect resumeButton, settingsButton, backButton;
-  bool isResumeHovered, isSettingsHovered, isBackHovered;
+  SDL_Rect resumeButton, backButton;
+  bool isResumeHovered, isBackHovered;
   TTF_Font *font;
+  SDL_Rect musicSliderBar, musicSliderHandle;
+  SDL_Rect sfxSliderBar, sfxSliderHandle;
+  bool draggingMusic = false;
+  bool draggingSfx = false;
 
 public:
   PauseMenuScene();
@@ -17,4 +21,6 @@ public:
   void update() override;
   void render() override;
   void drawButton(SDL_Rect rect, const char *text, bool hovered);
+  void drawText(const char *message, int x, int y, SDL_Color color,
+                TTF_Font *font);
 };

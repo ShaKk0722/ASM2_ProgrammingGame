@@ -174,6 +174,22 @@ void SettingsScene::render() {
   SDL_FreeSurface(surf);
   SDL_RenderCopy(Game::renderer, tex, nullptr, &rect);
   SDL_DestroyTexture(tex);
+
+  // sfx
+  //  === SFX Buttons ===
+  drawButton(sfxDownButton, "SFX -", isSfxDownHovered);
+  drawButton(sfxUpButton, "SFX +", isSfxUpHovered);
+
+  // === SFX Volume Text ===
+  char sfxText[64];
+  sprintf(sfxText, "SFX: %d%%", (Game::sfxVolume * 100) / MIX_MAX_VOLUME);
+  SDL_Surface *sSurf = TTF_RenderText_Blended(font, sfxText, black);
+  SDL_Texture *sTex = SDL_CreateTextureFromSurface(Game::renderer, sSurf);
+  SDL_Rect sRect = {500 - sSurf->w / 2, sfxDownButton.y - 40, sSurf->w,
+                    sSurf->h};
+  SDL_FreeSurface(sSurf);
+  SDL_RenderCopy(Game::renderer, sTex, nullptr, &sRect);
+  SDL_DestroyTexture(sTex);
 }
 
 void SettingsScene::drawButton(SDL_Rect rect, const char *text, bool hovered) {

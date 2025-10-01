@@ -354,7 +354,7 @@ void GamePlayWithAIScene::render() {
 void GamePlayWithAIScene::updateAI() {
   Uint32 now = SDL_GetTicks();
 
-  if (now - lastAIMove >= 300) {
+  if (now - lastAIMove >= 10) {
     int bestAIPlayer = findBestAIPlayer();
     moveAIPlayer(bestAIPlayer);
     lastAIMove = now;

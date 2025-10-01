@@ -84,8 +84,8 @@ void GamePlayWithAIScene::init(Manager *m) {
   ball->loadBall("assets/images/ball.png");
   team1Players[0]->loadPlayer("assets/images/vietnam.png");
   team1Players[1]->loadPlayer("assets/images/vietnam.png");
-  team2Players[0]->loadPlayer("assets/images/china.png");
-  team2Players[1]->loadPlayer("assets/images/china.png");
+  team2Players[0]->loadPlayer("assets/images/thai.png");
+  team2Players[1]->loadPlayer("assets/images/thai.png");
   ground->loadGround("assets/images/football_field.jpeg");
   this->loadBackgroundFrames("assets/images/cheering_6", 10);
   // In GamePlayScene::init
@@ -290,6 +290,8 @@ void GamePlayWithAIScene::render() {
   SDL_RenderCopy(Game::renderer, timerTex, nullptr, &timerRect);
   SDL_FreeSurface(timerSurf);
   SDL_DestroyTexture(timerTex);
+  renderScore();
+
   if (matchOver) {
     // Dim overlay
     SDL_SetRenderDrawBlendMode(Game::renderer, SDL_BLENDMODE_BLEND);
@@ -476,6 +478,10 @@ void GamePlayWithAIScene::resetBall() {
   ball->set_y(centerY);
   ball->set_velocity_x(0);
   ball->set_velocity_y(0);
+  team1Players[0]->setPosition(fieldX + 100, centerY - 50);
+  team1Players[1]->setPosition(fieldX + 100, centerY + 50);
+  team2Players[0]->setPosition(fieldX + fieldWidth - 100, centerY - 50);
+  team2Players[1]->setPosition(fieldX + fieldWidth - 100, centerY + 50);
 }
 
 void GamePlayWithAIScene::moveAIPlayer(int playerIndex) {

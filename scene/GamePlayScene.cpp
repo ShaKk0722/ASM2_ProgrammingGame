@@ -85,8 +85,8 @@ void GamePlayScene::init(Manager *m) {
   ball->loadBall("assets/images/ball.png");
   team1Players[0]->loadPlayer("assets/images/vietnam.png");
   team1Players[1]->loadPlayer("assets/images/vietnam.png");
-  team2Players[0]->loadPlayer("assets/images/china.png");
-  team2Players[1]->loadPlayer("assets/images/china.png");
+  team2Players[0]->loadPlayer("assets/images/thai.png");
+  team2Players[1]->loadPlayer("assets/images/thai.png");
   ground->loadGround("assets/images/football_field.jpeg");
   this->loadBackgroundFrames("assets/images/cheering_6",
                              10); // adjust number of frames
@@ -503,6 +503,10 @@ void GamePlayScene::resetBall() {
   ball->set_y(centerY);
   ball->set_velocity_x(0);
   ball->set_velocity_y(0);
+  team1Players[0]->setPosition(fieldX + 100, centerY - 50);
+  team1Players[1]->setPosition(fieldX + 100, centerY + 50);
+  team2Players[0]->setPosition(fieldX + fieldWidth - 100, centerY - 50);
+  team2Players[1]->setPosition(fieldX + fieldWidth - 100, centerY + 50);
 }
 
 void GamePlayScene::renderScore() {

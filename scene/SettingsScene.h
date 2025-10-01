@@ -20,6 +20,7 @@ private:
   bool isSfxDownHovered;
   bool isSfxUpHovered;
   bool dragging;
+  bool draggingSfx;
   bool isDownHovered;
   bool isUpHovered;
   bool isBackHovered;

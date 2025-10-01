@@ -66,22 +66,26 @@ void SettingsScene::init(Manager *m) {
 void SettingsScene::handleEvents(SDL_Event event) {
   if (event.type == SDL_MOUSEMOTION) {
     int mx = event.motion.x, my = event.motion.y;
-    isDownHovered = (mx >= volumeDownButton.x &&
-                     mx <= volumeDownButton.x + volumeDownButton.w &&
-                     my >= volumeDownButton.y &&
-                     my <= volumeDownButton.y + volumeDownButton.h);
-    isUpHovered =
-        (mx >= volumeUpButton.x && mx <= volumeUpButton.x + volumeUpButton.w &&
-         my >= volumeUpButton.y && my <= volumeUpButton.y + volumeUpButton.h);
+
     isBackHovered = (mx >= backButton.x && mx <= backButton.x + backButton.w &&
                      my >= backButton.y && my <= backButton.y + backButton.h);
 
-    // dragging logic
+    // Dragging Music
     if (dragging) {
       int newX = std::max(sliderBar.x, std::min(mx, sliderBar.x + sliderBar.w));
       sliderHandle.x = newX - sliderHandle.w / 2;
       Game::volume = ((newX - sliderBar.x) * MIX_MAX_VOLUME) / sliderBar.w;
       Mix_VolumeMusic(Game::volume);
+    }
+
+    // Dragging SFX
+    if (draggingSfx) {
+      int newX = std::max(sfxSliderBar.x,
+                          std::min(mx, sfxSliderBar.x + sfxSliderBar.w));
+      sfxSliderHandle.x = newX - sfxSliderHandle.w / 2;
+      Game::sfxVolume =
+          ((newX - sfxSliderBar.x) * MIX_MAX_VOLUME) / sfxSliderBar.w;
+      Mix_Volume(-1, Game::sfxVolume);
     }
   }
 
@@ -89,14 +93,21 @@ void SettingsScene::handleEvents(SDL_Event event) {
       event.button.button == SDL_BUTTON_LEFT) {
     int mx = event.button.x, my = event.button.y;
 
-    if (isDownHovered) {
-      Game::volume = std::max(0, Game::volume - 1);
-      Mix_VolumeMusic(Game::volume);
+    // Music handle clicked
+    if (mx >= sliderHandle.x && mx <= sliderHandle.x + sliderHandle.w &&
+        my >= sliderHandle.y && my <= sliderHandle.y + sliderHandle.h) {
+      dragging = true;
     }
-    if (isUpHovered) {
-      Game::volume = std::min(MIX_MAX_VOLUME, Game::volume + 1);
-      Mix_VolumeMusic(Game::volume);
+
+    // SFX handle clicked
+    if (mx >= sfxSliderHandle.x &&
+        mx <= sfxSliderHandle.x + sfxSliderHandle.w &&
+        my >= sfxSliderHandle.y &&
+        my <= sfxSliderHandle.y + sfxSliderHandle.h) {
+      draggingSfx = true;
     }
+
+    // Back button
     if (isBackHovered) {
       if (Game::lastState == GameState::Pause) {
         Game::gameState = GameState::Pause;
@@ -104,31 +115,19 @@ void SettingsScene::handleEvents(SDL_Event event) {
         Game::switchToMainMenu();
       }
     }
-
-    if (mx >= sliderHandle.x && mx <= sliderHandle.x + sliderHandle.w &&
-        my >= sliderHandle.y && my <= sliderHandle.y + sliderHandle.h) {
-      dragging = true;
-    }
-    if (isSfxDownHovered) {
-      Game::sfxVolume = std::max(0, Game::sfxVolume - 1);
-      Mix_Volume(-1, Game::sfxVolume);
-    }
-    if (isSfxUpHovered) {
-      Game::sfxVolume = std::min(MIX_MAX_VOLUME, Game::sfxVolume + 1);
-      Mix_Volume(-1, Game::sfxVolume);
-    }
   }
 
   if (event.type == SDL_MOUSEBUTTONUP &&
       event.button.button == SDL_BUTTON_LEFT) {
     dragging = false;
+    draggingSfx = false;
   }
 }
 
 void SettingsScene::update() {}
 
 void SettingsScene::render() {
-  // --- Background ---
+  // Background
   if (backgroundTexture) {
     SDL_RenderCopy(Game::renderer, backgroundTexture, nullptr, nullptr);
   } else {
@@ -136,20 +135,12 @@ void SettingsScene::render() {
     SDL_RenderClear(Game::renderer);
   }
 
-  // --- Colors ---
-  SDL_Color white = {255, 255, 255, 255};
   SDL_Color black = {0, 0, 0, 255};
-
-  // Layout constants (tuned for 1000x600)
   const int centerX = 500;
-  const int sectionGap = 120; // space between sections
-  const int labelGap = 40;    // label above control
-  const int belowGap = 40;    // text below control
-  const int barHeight = 10;
 
-  // ========== Title ==========
+  // === Title ===
   {
-    SDL_Surface *s = TTF_RenderText_Blended(font, "Settings", white);
+    SDL_Surface *s = TTF_RenderText_Blended(font, "Settings", black);
     SDL_Texture *t = SDL_CreateTextureFromSurface(Game::renderer, s);
     SDL_Rect r = {centerX - s->w / 2, 60, s->w, s->h};
     SDL_FreeSurface(s);
@@ -157,91 +148,64 @@ void SettingsScene::render() {
     SDL_DestroyTexture(t);
   }
 
-  // ********** MUSIC SECTION **********
-  // Reposition music slider & handle for clean layout
-  sliderBar.x = centerX - sliderBar.w / 2;
-  sliderBar.y = 160; // bar Y
-  // Handle follows current volume so +/- changes reflect visually
-  sliderHandle.x = sliderBar.x +
-                   ((Game::volume * sliderBar.w) / MIX_MAX_VOLUME) -
-                   sliderHandle.w / 2;
-  sliderHandle.y = sliderBar.y - (sliderHandle.h - barHeight) / 2 - 1;
-
-  // Label: "Music Volume"
+  // === Music Section ===
   {
-    SDL_Surface *s = TTF_RenderText_Blended(font, "Music Volume", white);
+    // Label
+    SDL_Surface *s = TTF_RenderText_Blended(font, "Music Volume", black);
     SDL_Texture *t = SDL_CreateTextureFromSurface(Game::renderer, s);
-    SDL_Rect r = {centerX - s->w / 2, sliderBar.y - labelGap, s->w, s->h};
+    SDL_Rect r = {centerX - s->w / 2, sliderBar.y - 40, s->w, s->h};
     SDL_FreeSurface(s);
     SDL_RenderCopy(Game::renderer, t, nullptr, &r);
     SDL_DestroyTexture(t);
-  }
 
-  // Slider bar + handle
-  SDL_SetRenderDrawColor(Game::renderer, 220, 220, 220, 255);
-  SDL_RenderFillRect(Game::renderer, &sliderBar);
-  SDL_SetRenderDrawColor(Game::renderer, 100, 149, 237, 255);
-  SDL_RenderFillRect(Game::renderer, &sliderHandle);
+    // Bar + handle
+    SDL_SetRenderDrawColor(Game::renderer, 220, 220, 220, 255);
+    SDL_RenderFillRect(Game::renderer, &sliderBar);
+    SDL_SetRenderDrawColor(Game::renderer, 100, 149, 237, 255);
+    SDL_RenderFillRect(Game::renderer, &sliderHandle);
 
-  // Music +/- buttons positioned under the slider
-  volumeDownButton.x = centerX - 150;
-  volumeDownButton.y = sliderBar.y + 20 + 10; // a bit below bar
-  volumeUpButton.x = centerX + 50;
-  volumeUpButton.y = volumeDownButton.y;
-  drawButton(volumeDownButton, "-", isDownHovered);
-  drawButton(volumeUpButton, "+", isUpHovered);
-
-  // Music percent text centered below
-  {
+    // Percentage
     char txt[16];
     std::snprintf(txt, sizeof(txt), "%d%%",
                   (Game::volume * 100) / MIX_MAX_VOLUME);
-    SDL_Surface *s = TTF_RenderText_Blended(font, txt, white);
+    SDL_Surface *p = TTF_RenderText_Blended(font, txt, black);
+    SDL_Texture *pt = SDL_CreateTextureFromSurface(Game::renderer, p);
+    SDL_Rect pr = {centerX - p->w / 2, sliderBar.y + 40, p->w, p->h};
+    SDL_FreeSurface(p);
+    SDL_RenderCopy(Game::renderer, pt, nullptr, &pr);
+    SDL_DestroyTexture(pt);
+  }
+
+  // === SFX Section ===
+  {
+    // Label
+    SDL_Surface *s = TTF_RenderText_Blended(font, "SFX Volume", black);
     SDL_Texture *t = SDL_CreateTextureFromSurface(Game::renderer, s);
-    SDL_Rect r = {centerX - s->w / 2, volumeDownButton.y + belowGap, s->w,
-                  s->h};
+    SDL_Rect r = {centerX - s->w / 2, sfxSliderBar.y - 40, s->w, s->h};
     SDL_FreeSurface(s);
     SDL_RenderCopy(Game::renderer, t, nullptr, &r);
     SDL_DestroyTexture(t);
-  }
 
-  // ********** SFX SECTION **********
-  const int sfxTopY = sliderBar.y + sectionGap; // start of SFX section
+    // Bar + handle
+    SDL_SetRenderDrawColor(Game::renderer, 220, 220, 220, 255);
+    SDL_RenderFillRect(Game::renderer, &sfxSliderBar);
+    SDL_SetRenderDrawColor(Game::renderer, 255, 165, 0, 255);
+    SDL_RenderFillRect(Game::renderer, &sfxSliderHandle);
 
-  // Label: "SFX Volume"
-  {
-    SDL_Surface *s = TTF_RenderText_Blended(font, "SFX Volume", white);
-    SDL_Texture *t = SDL_CreateTextureFromSurface(Game::renderer, s);
-    SDL_Rect r = {centerX - s->w / 2, sfxTopY, s->w, s->h};
-    SDL_FreeSurface(s);
-    SDL_RenderCopy(Game::renderer, t, nullptr, &r);
-    SDL_DestroyTexture(t);
-  }
-
-  // SFX +/- buttons centered under the label
-  sfxDownButton.x = centerX - 150;
-  sfxDownButton.y = sfxTopY + 20;
-  sfxUpButton.x = centerX + 50;
-  sfxUpButton.y = sfxDownButton.y;
-  drawButton(sfxDownButton, "SFX -", isSfxDownHovered);
-  drawButton(sfxUpButton, "SFX +", isSfxUpHovered);
-
-  // SFX percent text centered below its buttons
-  {
+    // Percentage
     char txt[16];
     std::snprintf(txt, sizeof(txt), "%d%%",
                   (Game::sfxVolume * 100) / MIX_MAX_VOLUME);
-    SDL_Surface *s = TTF_RenderText_Blended(font, txt, white);
-    SDL_Texture *t = SDL_CreateTextureFromSurface(Game::renderer, s);
-    SDL_Rect r = {centerX - s->w / 2, sfxDownButton.y + belowGap, s->w, s->h};
-    SDL_FreeSurface(s);
-    SDL_RenderCopy(Game::renderer, t, nullptr, &r);
-    SDL_DestroyTexture(t);
+    SDL_Surface *p = TTF_RenderText_Blended(font, txt, black);
+    SDL_Texture *pt = SDL_CreateTextureFromSurface(Game::renderer, p);
+    SDL_Rect pr = {centerX - p->w / 2, sfxSliderBar.y + 40, p->w, p->h};
+    SDL_FreeSurface(p);
+    SDL_RenderCopy(Game::renderer, pt, nullptr, &pr);
+    SDL_DestroyTexture(pt);
   }
 
-  // ********** BACK BUTTON **********
+  // === Back Button ===
   backButton.x = centerX - backButton.w / 2;
-  backButton.y = sfxDownButton.y + belowGap + 60; // nicely spaced under SFX %
   drawButton(backButton, "Back", isBackHovered);
 }
 

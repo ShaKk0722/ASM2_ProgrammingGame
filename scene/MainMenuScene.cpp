@@ -104,11 +104,13 @@ void MainMenuScene::handleEvents(SDL_Event event) {
 
     if (isPointInRect(mouseX, mouseY, playWithPlayerButton)) {
       std::cout << "Play With Players clicked!" << std::endl;
+      Game::gameplayScene.reset(); // ✅ clean reset
       Game::switchToGamePlay();
     }
 
     if (isPointInRect(mouseX, mouseY, playWithAIButton)) {
       std::cout << "Play With AI clicked!" << std::endl;
+      Game::gamePlayWithAIScene.reset(); // ✅ clean reset
       Game::switchToGamePlayWithAI();
     }
 

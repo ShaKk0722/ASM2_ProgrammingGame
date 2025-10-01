@@ -48,7 +48,7 @@ private:
   SDL_Rect backBtn = {380, 430, 240, 60};
   bool againHov = false, backHov = false;
 
-    Uint32 lastNonActiveAIMove = 0;
+  Uint32 lastNonActiveAIMove = 0;
 
 public:
   GamePlayScene();
@@ -58,6 +58,7 @@ public:
   void handleEvents(SDL_Event event);
   void update();
   void render();
+  void reset();
 
   // HaxBall functions
   void checkGoal();

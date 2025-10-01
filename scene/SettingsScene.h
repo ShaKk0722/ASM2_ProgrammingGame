@@ -12,6 +12,9 @@ private:
   SDL_Texture *backgroundTexture;
   SDL_Rect sliderBar;
   SDL_Rect sliderHandle;
+  SDL_Rect sfxSliderBar;
+  SDL_Rect sfxSliderHandle;
+
   SDL_Rect sfxDownButton;
   SDL_Rect sfxUpButton;
   bool isSfxDownHovered;

@@ -543,3 +543,23 @@ void GamePlayScene::renderScore() {
   SDL_FreeSurface(surf2);
   SDL_DestroyTexture(tex2);
 }
+void GamePlayScene::reset() {
+  team1Score = 0;
+  team2Score = 0;
+  goalScored = false;
+  goalTeam = 0;
+  ballResetPending = false;
+  matchOver = false;
+  winnerTeam = 0;
+  startTime = SDL_GetTicks();
+  elapsedSeconds = 0;
+
+  // Reset ball to center
+  resetBall();
+
+  // Reset players to initial positions
+  team1Players[0]->setPosition(fieldX + 100, centerY - 50);
+  team1Players[1]->setPosition(fieldX + 100, centerY + 50);
+  team2Players[0]->setPosition(fieldX + fieldWidth - 100, centerY - 50);
+  team2Players[1]->setPosition(fieldX + fieldWidth - 100, centerY + 50);
+}

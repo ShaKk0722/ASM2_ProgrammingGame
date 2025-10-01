@@ -68,6 +68,7 @@ public:
   void handleEvents(SDL_Event event) override;
   void update() override;
   void render() override;
+  void reset();
 
   // Scoreboard helpers
   void checkGoal();

@@ -178,45 +178,7 @@ void GamePlayScene::handleEvents(SDL_Event event) {
 }
 
 void GamePlayScene::update() {
-    Uint32 now = SDL_GetTicks();
-    if (windActive) {
-        // Deactivate wind after its duration
-        if (now > windStartTime + windDuration) {
-            windActive = false;
-            windX = 0; // Reset wind force
-            windY = 0;
-        }
-    } else {
-        // Reactivate wind after cooldown
-        if (now > windStartTime + windDuration + windCooldown) {
-            windActive = true;
-            windStartTime = now;
-
-            // Randomize wind direction and strength
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> windDistrib(-0.5f, 0.5f); // Wind strength range (-0.5 to 0.5)
-
-            windX = windDistrib(gen);
-            windY = windDistrib(gen);
-        }
-    }
-  // Team 1 active player: WASD
-  if (keyStates[SDL_SCANCODE_W])
-    team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY,
-                                      fieldWidth, fieldHeight);
-  else if (keyStates[SDL_SCANCODE_S])
-    team1Players[activePlayer1]->move(SDL_SCANCODE_S, fieldX, fieldY,
-                                      fieldWidth, fieldHeight);
-  else if (keyStates[SDL_SCANCODE_A])
-    team1Players[activePlayer1]->move(SDL_SCANCODE_A, fieldX, fieldY,
-                                      fieldWidth, fieldHeight);
-  else if (keyStates[SDL_SCANCODE_D])
-    team1Players[activePlayer1]->move(SDL_SCANCODE_D, fieldX, fieldY,
-                                      fieldWidth, fieldHeight);
-  else
-    team1Players[activePlayer1]->move(-1, fieldX, fieldY, fieldWidth,
-                                      fieldHeight);
+  Uint32 now = SDL_GetTicks();
 
   float distance_to_ball1 =
       team1Players[activePlayer1]->get_distance(ball->get_x(), ball->get_y());
@@ -233,7 +195,45 @@ void GamePlayScene::update() {
     state1 = 1;
     state2 = 2;
   }
+  if (windActive) {
+      // Deactivate wind after its duration
+      if (now > windStartTime + windDuration) {
+          windActive = false;
+          windX = 0; // Reset wind force
+          windY = 0;
+      }
+  } 
+  else {
+      // Reactivate wind after cooldown
+      if (now > windStartTime + windDuration + windCooldown) {
+          windActive = true;
+          windStartTime = now;
 
+          // Randomize wind direction and strength
+          std::random_device rd;
+          std::mt19937 gen(rd());
+          std::uniform_real_distribution<float> windDistrib(-0.5f, 0.5f); // Wind strength range (-0.5 to 0.5)
+
+          windX = windDistrib(gen);
+          windY = windDistrib(gen);
+      }
+  }
+  // Team 1 active player: WASD
+  if (keyStates[SDL_SCANCODE_W])
+    team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+  else if (keyStates[SDL_SCANCODE_S])
+    team1Players[activePlayer1]->move(SDL_SCANCODE_S, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+  else if (keyStates[SDL_SCANCODE_A])
+    team1Players[activePlayer1]->move(SDL_SCANCODE_A, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+  else if (keyStates[SDL_SCANCODE_D])
+    team1Players[activePlayer1]->move(SDL_SCANCODE_D, fieldX, fieldY,
+                                      fieldWidth, fieldHeight);
+  else
+    team1Players[activePlayer1]->move(-1, fieldX, fieldY, fieldWidth,
+                                      fieldHeight);
   // Team 2 active player: Arrow keys
   if (keyStates[SDL_SCANCODE_UP])
     team2Players[activePlayer2]->move(SDL_SCANCODE_UP, fieldX, fieldY,
@@ -250,50 +250,6 @@ void GamePlayScene::update() {
   else
     team2Players[activePlayer2]->move(-1, fieldX, fieldY, fieldWidth,
                                       fieldHeight);
-
-  float accelerator_x = 0, accelerator_y = 0;
-
-  for (int i = 0; i < 2; ++i) {
-    float distance_1 = d2(ball->get_x(), team1Players[i]->get_x(),
-                          ball->get_y(), team1Players[i]->get_y());
-    float distance_2 = d2(ball->get_x(), team2Players[i]->get_x(),
-                          ball->get_y(), team2Players[i]->get_y());
-
-    if (distance_1 <= ball->get_radius() + team1Players[i]->get_radius()) {
-      accelerator_x += team1Players[i]->get_velocity_x();
-      accelerator_y += team1Players[i]->get_velocity_y();
-
-      if (Game::sfxEnabled && Game::kickSound)
-        Mix_PlayChannel(-1, Game::kickSound, 0);
-    }
-
-    if (distance_2 <= ball->get_radius() + team2Players[i]->get_radius()) {
-      accelerator_x += team2Players[i]->get_velocity_x();
-      accelerator_y += team2Players[i]->get_velocity_y();
-
-      if (Game::sfxEnabled && Game::kickSound)
-        Mix_PlayChannel(-1, Game::kickSound, 0);
-    }
-  }
-  // Apply wind effect to the ball if active
-  if (windActive) {
-      accelerator_x += windX;
-      accelerator_y += windY;
-  }
-
-  ball->move(accelerator_x, accelerator_y, fieldX, fieldY, fieldWidth,
-             fieldHeight);
-
-  // Check for goals
-  checkGoal();
-
-  
-  elapsedSeconds = (now - startTime) / 1000;
-
-  if (now > lastFrameTime + frameDelay) {
-    currentFrame = (currentFrame + 1) % backgroundFrames.size();
-    lastFrameTime = now;
-  }
   if (now - lastNonActiveAIMove >= 5) {
     // Team 1 non-active player: AI
     for (int i = 0; i < 2; ++i) {
@@ -352,6 +308,51 @@ void GamePlayScene::update() {
     }
     lastNonActiveAIMove = now;
   }
+                                      
+  float accelerator_x = 0, accelerator_y = 0;
+
+  for (int i = 0; i < 2; ++i) {
+    float distance_1 = d2(ball->get_x(), team1Players[i]->get_x(),
+                          ball->get_y(), team1Players[i]->get_y());
+    float distance_2 = d2(ball->get_x(), team2Players[i]->get_x(),
+                          ball->get_y(), team2Players[i]->get_y());
+
+    if (distance_1 <= ball->get_radius() + team1Players[i]->get_radius()) {
+      accelerator_x += team1Players[i]->get_velocity_x();
+      accelerator_y += team1Players[i]->get_velocity_y();
+
+      if (Game::sfxEnabled && Game::kickSound)
+        Mix_PlayChannel(-1, Game::kickSound, 0);
+    }
+
+    if (distance_2 <= ball->get_radius() + team2Players[i]->get_radius()) {
+      accelerator_x += team2Players[i]->get_velocity_x();
+      accelerator_y += team2Players[i]->get_velocity_y();
+
+      if (Game::sfxEnabled && Game::kickSound)
+        Mix_PlayChannel(-1, Game::kickSound, 0);
+    }
+  }
+  // Apply wind effect to the ball if active
+  if (windActive) {
+      accelerator_x += windX;
+      accelerator_y += windY;
+  }
+
+  ball->move(accelerator_x, accelerator_y, fieldX, fieldY, fieldWidth,
+             fieldHeight);
+
+  // Check for goals
+  checkGoal();
+
+  
+  elapsedSeconds = (now - startTime) / 1000;
+
+  if (now > lastFrameTime + frameDelay) {
+    currentFrame = (currentFrame + 1) % backgroundFrames.size();
+    lastFrameTime = now;
+  }
+
 
   if (matchOver)
     return;

@@ -30,6 +30,7 @@ private:
 
   // === AI helpers ===
   Uint32 lastAIMove = 0;
+  Uint32 lastNonActiveAIMove = 0;
   void updateAI();
   void moveAIPlayer(int playerIndex);
   int findBestAIPlayer();

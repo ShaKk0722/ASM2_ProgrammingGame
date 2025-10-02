@@ -173,29 +173,47 @@ void GamePlayWithAIScene::handleEvents(SDL_Event event) {
 }
 
 void GamePlayWithAIScene::update() {
-    Uint32 now = SDL_GetTicks();
-    if (windActive) {
-        // Deactivate wind after its duration
-        if (now > windStartTime + windDuration) {
-            windActive = false;
-            windX = 0; // Reset wind force
-            windY = 0;
-        }
-    } else {
-        // Reactivate wind after cooldown
-        if (now > windStartTime + windDuration + windCooldown) {
-            windActive = true;
-            windStartTime = now;
+  Uint32 now = SDL_GetTicks();
 
-            // Randomize wind direction and strength
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> windDistrib(-0.5f, 0.5f); // Wind strength range (-0.5 to 0.5)
+  float distance_to_ball1 =
+      team1Players[activePlayer1]->get_distance(ball->get_x(), ball->get_y());
+  int activePlayer2 = findBestAIPlayer();
+  float distance_to_ball2 =
+      team2Players[activePlayer2]->get_distance(ball->get_x(), ball->get_y());
+  int state1 = 0, state2 = 0; // 0: idle, 1: attack, 2: defense
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distrib(0, 1);
+  if (distance_to_ball1 > distance_to_ball2) {
+    state1 = 2;
+    state2 = 1;
+  } else if (distance_to_ball1 < distance_to_ball2) {
+    state1 = 1;
+    state2 = 2;
+  }
+  if (windActive) {
+      // Deactivate wind after its duration
+      if (now > windStartTime + windDuration) {
+          windActive = false;
+          windX = 0; // Reset wind force
+          windY = 0;
+      }
+  } 
+  else {
+      // Reactivate wind after cooldown
+      if (now > windStartTime + windDuration + windCooldown) {
+          windActive = true;
+          windStartTime = now;
 
-            windX = windDistrib(gen);
-            windY = windDistrib(gen);
-        }
-    }
+          // Randomize wind direction and strength
+          std::random_device rd;
+          std::mt19937 gen(rd());
+          std::uniform_real_distribution<float> windDistrib(-0.5f, 0.5f); // Wind strength range (-0.5 to 0.5)
+
+          windX = windDistrib(gen);
+          windY = windDistrib(gen);
+      }
+  }
   // Team 1 active player: WASD
   if (keyStates[SDL_SCANCODE_W])
     team1Players[activePlayer1]->move(SDL_SCANCODE_W, fieldX, fieldY,
@@ -214,6 +232,64 @@ void GamePlayWithAIScene::update() {
                                       fieldHeight);
 
   updateAI();
+  if (now - lastNonActiveAIMove >= 5) {
+    // Team 1 non-active player: AI
+    for (int i = 0; i < 2; ++i) {
+      if (i != activePlayer1) {
+        int moveY = distrib(gen);
+        if (state1 == 0)
+          team1Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
+        else if (state1 == 1) {
+          team1Players[i]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth,
+                                fieldHeight);
+          if (moveY == 0)
+            team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+          else
+            team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+        } else if (state1 == 2) {
+          team1Players[i]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth,
+                                fieldHeight);
+          if (moveY == 0)
+            team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+          else
+            team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+        }
+      }
+    }
+
+    // Team 2 non-active player: AI
+    for (int i = 0; i < 2; ++i) {
+      if (i != activePlayer2) {
+        int moveY = distrib(gen);
+        if (state2 == 0)
+          team2Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
+        else if (state2 == 1) {
+          team2Players[i]->move(SDL_SCANCODE_LEFT, fieldX, fieldY, fieldWidth,
+                                fieldHeight);
+          if (moveY == 0)
+            team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+          else
+            team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+        } else if (state2 == 2) {
+          team2Players[i]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth,
+                                fieldHeight);
+          if (moveY == 0)
+            team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+          else
+            team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth,
+                                  fieldHeight);
+        }
+      }
+    }
+    lastNonActiveAIMove = now;
+  }
 
   float accelerator_x = 0, accelerator_y = 0;
 

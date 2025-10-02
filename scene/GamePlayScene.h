@@ -75,6 +75,8 @@ public:
   void update();
   void render();
   void reset();
+  void resolvePlayerBallCollision(Player* player, Ball* ball);
+  void resolvePlayerPlayerCollision(Player* p1, Player* p2);
 
   // HaxBall functions
   void checkGoal();

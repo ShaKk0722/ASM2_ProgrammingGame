@@ -84,6 +84,8 @@ public:
   void update() override;
   void render() override;
   void reset();
+  void resolvePlayerBallCollision(Player* player, Ball* ball);
+  void resolvePlayerPlayerCollision(Player* p1, Player* p2);
 
   // Scoreboard helpers
   void checkGoal();

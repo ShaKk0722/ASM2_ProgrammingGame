@@ -340,6 +340,23 @@ void GamePlayWithAIScene::update() {
     }
     lastNonActiveAIMove = now;
   }
+  
+  // Player-Player Collision Resolution 
+  // ------------------------------------
+
+  // Team 1 vs Team 2
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 0; j < 2; ++j) {
+      resolvePlayerPlayerCollision(team1Players[i], team2Players[j]);
+    }
+  }
+
+  // Team 1 vs Team 1
+  resolvePlayerPlayerCollision(team1Players[0], team1Players[1]);
+
+  // Team 2 vs Team 2
+  resolvePlayerPlayerCollision(team2Players[0], team2Players[1]);
+  
   float accelerator_x = 0, accelerator_y = 0;
 
   for (int i = 0; i < 2; ++i) {
@@ -366,6 +383,12 @@ void GamePlayWithAIScene::update() {
         Mix_PlayChannel(-1, Game::kickSound, 0);
     }
   }
+
+  for (int i = 0; i < 2; ++i) {
+      resolvePlayerBallCollision(team1Players[i], ball);
+      resolvePlayerBallCollision(team2Players[i], ball);
+  }
+
   if (windActive) {
       accelerator_x += windX;
       accelerator_y += windY;
@@ -723,4 +746,110 @@ void GamePlayWithAIScene::reset() {
   team1Players[1]->setPosition(fieldX + 100, centerY + 50);
   team2Players[0]->setPosition(fieldX + fieldWidth - 100, centerY - 50);
   team2Players[1]->setPosition(fieldX + fieldWidth - 100, centerY + 50);
+}
+
+// Helper function to resolve collision between a player and the ball
+void GamePlayWithAIScene::resolvePlayerBallCollision(Player* player, Ball* ball) {
+    float playerX = player->get_x();
+    float playerY = player->get_y();
+    float ballX = ball->get_x();
+    float ballY = ball->get_y();
+    float sumRadii = player->get_radius() + ball->get_radius();
+
+    float dx = ballX - playerX;
+    float dy = ballY - playerY;
+    float distance = std::sqrt(dx * dx + dy * dy);
+
+    // Check for overlap
+    if (distance < sumRadii && distance != 0) {
+        // Calculate the overlap amount
+        float overlap = sumRadii - distance;
+
+        // Calculate the unit vector for the direction of separation
+        float nx = dx / distance;
+        float ny = dy / distance;
+
+        // Apply positional correction to separate the player and ball
+        // Since the player's mass is likely much greater (or just the player
+        // is the 'immovable' object for simplicity, which is typical), 
+        // we'll move only the ball.
+
+        // Move the ball along the normal vector by the overlap amount
+        float newBallX = ballX + nx * overlap;
+        float newBallY = ballY + ny * overlap;
+
+        ball->set_x(newBallX);
+        ball->set_y(newBallY);
+    }
+}
+
+void GamePlayWithAIScene::resolvePlayerPlayerCollision(Player* p1, Player* p2) {
+    float p1X = p1->get_x();
+    float p1Y = p1->get_y();
+    float p2X = p2->get_x();
+    float p2Y = p2->get_y();
+    float sumRadii = p1->get_radius() + p2->get_radius();
+
+    float dx = p2X - p1X;
+    float dy = p2Y - p1Y;
+    float distance = std::sqrt(dx * dx + dy * dy);
+
+    // Check for overlap
+    if (distance < sumRadii && distance != 0) {
+        
+        // --- 1. Positional Correction (Separation) ---
+        float overlap = sumRadii - distance;
+        
+        // Calculate the unit vector for the direction of separation
+        float nx = dx / distance;
+        float ny = dy / distance;
+
+        // Separate the players equally by moving them half the overlap distance
+        float p1_newX = p1X - nx * (overlap / 2.0f);
+        float p1_newY = p1Y - ny * (overlap / 2.0f);
+        float p2_newX = p2X + nx * (overlap / 2.0f);
+        float p2_newY = p2Y + ny * (overlap / 2.0f);
+
+        p1->set_x(p1_newX);
+        p1->set_y(p1_newY);
+        p2->set_x(p2_newX);
+        p2->set_y(p2_newY);
+
+
+        // --- 2. Velocity Reflection (Mass-Based Bounce) ---
+        float m1 = p1->get_mass(); // Assuming get_mass() exists
+        float m2 = p2->get_mass(); // Assuming get_mass() exists
+        float v1x = p1->get_velocity_x();
+        float v1y = p1->get_velocity_y();
+        float v2x = p2->get_velocity_x();
+        float v2y = p2->get_velocity_y();
+
+        // Calculate relative velocity
+        float vrx = v1x - v2x;
+        float vry = v1y - v2y;
+
+        // Relative velocity along the normal (dot product: V_rel * N)
+        float vp12n = vrx * nx + vry * ny;
+
+        // If players are already moving away, do nothing with velocity
+        if (vp12n < 0) {
+            float bounce_factor = 0.8f; // Coefficient of restitution (e)
+
+            // Calculate impulse scalar (j) based on momentum and restitution
+            // j = -(1+e) * vp12n / (1/m1 + 1/m2)
+            float j = (-(1.0f + bounce_factor) * vp12n) / (1.0f/m1 + 1.0f/m2);
+
+            // Calculate impulse vector (J)
+            float jx = j * nx;
+            float jy = j * ny;
+
+            // Apply impulse to update velocities
+            // V_final = V_initial + J / m
+            p1->set_velocity_x(v1x + jx / m1);
+            p1->set_velocity_y(v1y + jy / m1);
+
+            p2->set_velocity_x(v2x - jx / m2); // Note the subtraction for p2
+            p2->set_velocity_y(v2y - jy / m2);
+        }
+    }
 }

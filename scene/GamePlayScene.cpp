@@ -185,9 +185,6 @@ void GamePlayScene::update() {
   float distance_to_ball2 =
       team2Players[activePlayer2]->get_distance(ball->get_x(), ball->get_y());
   int state1 = 0, state2 = 0; // 0: idle, 1: attack, 2: defense
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distrib(0, 1);
   if (distance_to_ball1 > distance_to_ball2) {
     state1 = 2;
     state2 = 1;
@@ -250,60 +247,113 @@ void GamePlayScene::update() {
   else
     team2Players[activePlayer2]->move(-1, fieldX, fieldY, fieldWidth,
                                       fieldHeight);
+  // Ensure you have access to the field center for defensive positioning
+  float centerY = fieldY + fieldHeight / 2.0f; 
+
   if (now - lastNonActiveAIMove >= 5) {
-    // Team 1 non-active player: AI
+    // Team 1 non-active player: AI (Goal on the Left)
     for (int i = 0; i < 2; ++i) {
       if (i != activePlayer1) {
-        int moveY = distrib(gen);
-        if (state1 == 0)
-          team1Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
-        else if (state1 == 1) {
-          team1Players[i]->move(SDL_SCANCODE_D, fieldX, fieldY, fieldWidth,
-                                fieldHeight);
-          if (moveY == 0)
-            team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-          else
-            team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-        } else if (state1 == 2) {
-          team1Players[i]->move(SDL_SCANCODE_A, fieldX, fieldY, fieldWidth,
-                                fieldHeight);
-          if (moveY == 0)
-            team1Players[i]->move(SDL_SCANCODE_W, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-          else
-            team1Players[i]->move(SDL_SCANCODE_S, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
+        float targetX = team1Players[activePlayer1]->get_x();
+        float targetY = team1Players[activePlayer1]->get_y();
+
+        if (state1 == 0) {
+          // Idle: Stay put (let deceleration handle it)
+        } else if (state1 == 1) { // Attack: Dynamic Support Runs
+          if (i == 0) { // Primary Attacker: Wide Support Run (Top/Outside)
+            // Position ahead of the ball, near the top boundary
+            targetX = ball->get_x() + 100.0f; 
+            targetY = std::min(team1Players[activePlayer1]->get_y() - 100.0f, fieldY + 70.0f);
+          } else { // Secondary Attacker: Central Support (Near Active Player)
+            // Position slightly behind and closer to the active player for a safer pass option
+            targetX = team1Players[activePlayer1]->get_x() + 50.0f;
+            targetY = team1Players[activePlayer1]->get_y() + (team1Players[activePlayer1]->get_y() < centerY ? 50 : -50);
+          }
+        } else if (state1 == 2) { // Defense: Strategic Cover
+          float opponentX = team2Players[activePlayer2]->get_x();
+          float opponentY = team2Players[activePlayer2]->get_y();
+          
+          if (i == 0) { // Primary Defender: Cover the Ball (Screening)
+            // Position between the Ball and the Goal (fieldX)
+            targetX = (ball->get_x() + fieldX + team1Players[i]->get_radius()) / 2.0f;
+            targetY = ball->get_y();
+          } else { // Secondary Defender: Mark the Active Opponent
+            // Position between the Active Opponent and the Goal (fieldX)
+            targetX = (opponentX + fieldX + team1Players[i]->get_radius()) / 2.0f;
+            // Target the opponent's Y-position, staying close to them
+            targetY = opponentY; 
+          }
         }
+
+        // --- Movement Logic ---
+        int moveX = -1, moveY = -1;
+        float dx = targetX - team1Players[i]->get_x();
+        float dy = targetY - team1Players[i]->get_y();
+        const float AI_MOVE_TOLERANCE = 5.0f;
+
+        if (std::abs(dx) > AI_MOVE_TOLERANCE) {
+            moveX = (dx > 0) ? SDL_SCANCODE_D : SDL_SCANCODE_A;
+        }
+        if (std::abs(dy) > AI_MOVE_TOLERANCE) {
+            moveY = (dy > 0) ? SDL_SCANCODE_S : SDL_SCANCODE_W;
+        }
+        
+        if (moveX != -1) team1Players[i]->move(moveX, fieldX, fieldY, fieldWidth, fieldHeight);
+        if (moveY != -1) team1Players[i]->move(moveY, fieldX, fieldY, fieldWidth, fieldHeight);
+        if (moveX == -1 && moveY == -1) team1Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
       }
     }
 
-    // Team 2 non-active player: AI
+    // Team 2 non-active player: AI (Goal on the Right)
     for (int i = 0; i < 2; ++i) {
       if (i != activePlayer2) {
-        int moveY = distrib(gen);
-        if (state2 == 0)
-          team2Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
-        else if (state2 == 1) {
-          team2Players[i]->move(SDL_SCANCODE_LEFT, fieldX, fieldY, fieldWidth,
-                                fieldHeight);
-          if (moveY == 0)
-            team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-          else
-            team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-        } else if (state2 == 2) {
-          team2Players[i]->move(SDL_SCANCODE_RIGHT, fieldX, fieldY, fieldWidth,
-                                fieldHeight);
-          if (moveY == 0)
-            team2Players[i]->move(SDL_SCANCODE_UP, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
-          else
-            team2Players[i]->move(SDL_SCANCODE_DOWN, fieldX, fieldY, fieldWidth,
-                                  fieldHeight);
+        float targetX = team2Players[activePlayer2]->get_x();
+        float targetY = team2Players[activePlayer2]->get_y();
+
+        if (state2 == 0) {
+          // Idle: Stay put
+        } else if (state2 == 1) { // Attack: Dynamic Support Runs
+          if (i == 0) { // Primary Attacker: Wide Support Run (Top/Outside)
+            // Position ahead of the ball, near the top boundary
+            targetX = ball->get_x() - 100.0f; 
+            targetY = std::min(team2Players[activePlayer2]->get_y() - 100.0f, fieldY + 70.0f);
+          } else { // Secondary Attacker: Central Support (Near Active Player)
+            // Position slightly behind and closer to the active player for a safer pass option
+            targetX = team2Players[activePlayer2]->get_x() - 50.0f;
+            targetY = team2Players[activePlayer2]->get_y() + (team2Players[activePlayer2]->get_y() < centerY ? 50 : -50);
+          }
+        } else if (state2 == 2) { // Defense: Strategic Cover
+          float opponentX = team1Players[activePlayer1]->get_x();
+          float opponentY = team1Players[activePlayer1]->get_y();
+
+          if (i == 0) { // Primary Defender: Cover the Ball (Screening)
+            // Position between the Ball and the Goal (fieldX + fieldWidth)
+            targetX = (ball->get_x() + fieldX + fieldWidth - team2Players[i]->get_radius()) / 2.0f;
+            targetY = ball->get_y();
+          } else { // Secondary Defender: Mark the Active Opponent
+            // Position between the Active Opponent and the Goal (fieldX + fieldWidth)
+            targetX = (opponentX + fieldX + fieldWidth - team2Players[i]->get_radius()) / 2.0f;
+            // Target the opponent's Y-position, staying close to them
+            targetY = opponentY;
+          }
         }
+
+        // --- Movement Logic ---
+        int moveX = -1, moveY = -1;
+        float dx = targetX - team2Players[i]->get_x();
+        float dy = targetY - team2Players[i]->get_y();
+        const float AI_MOVE_TOLERANCE = 5.0f;
+
+        if (std::abs(dx) > AI_MOVE_TOLERANCE) {
+            moveX = (dx > 0) ? SDL_SCANCODE_RIGHT : SDL_SCANCODE_LEFT;
+        }
+        if (std::abs(dy) > AI_MOVE_TOLERANCE) {
+            moveY = (dy > 0) ? SDL_SCANCODE_DOWN : SDL_SCANCODE_UP;
+        }
+        
+        if (moveX != -1) team2Players[i]->move(moveX, fieldX, fieldY, fieldWidth, fieldHeight);
+        if (moveY != -1) team2Players[i]->move(moveY, fieldX, fieldY, fieldWidth, fieldHeight);
+        if (moveX == -1 && moveY == -1) team2Players[i]->move(-1, fieldX, fieldY, fieldWidth, fieldHeight);
       }
     }
     lastNonActiveAIMove = now;

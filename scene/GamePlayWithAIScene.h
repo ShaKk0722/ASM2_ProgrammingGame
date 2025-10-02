@@ -34,7 +34,6 @@ private:
   void updateAI();
   void moveAIPlayer(int playerIndex);
   int findBestAIPlayer();
-  void calculateAIMove(int playerIndex, int &moveX, int &moveY);
 
   // === HaxBall / Score system ===
   int team1Score = 0;

@@ -555,28 +555,6 @@ void GamePlayWithAIScene::updateAI() {
   }
 }
 
-void GamePlayWithAIScene::calculateAIMove(int playerIndex, int &moveX,
-                                          int &moveY) {
-
-  float ballX = ball->get_x();
-  float ballY = ball->get_y();
-  float playerX = team2Players[playerIndex]->get_x();
-  float playerY = team2Players[playerIndex]->get_y();
-
-  float dx = ballX - playerX;
-  float dy = ballY - playerY;
-  float distance = sqrt(dx * dx + dy * dy);
-
-  if (distance > 0) {
-    int moveStep = 3;
-    moveX = (int)((dx / distance) * moveStep);
-    moveY = (int)((dy / distance) * moveStep);
-  } else {
-    moveX = 0;
-    moveY = 0;
-  }
-}
-
 void GamePlayWithAIScene::renderScore() {
   SDL_Color white = {255, 255, 255, 255};
   SDL_Rect scoreBar = {350, 20, 300, 60};
